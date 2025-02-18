@@ -10,10 +10,6 @@
 #import "MessageWrapper.h"
 #import "MethodKeys.h"
 
-#import "MessageReactionHelper.h"
-#import "ThreadHelper.h"
-#import "MessagePinInfoHelper.h"
-
 
 @implementation MessageWrapper
 - (instancetype)initWithChannelName:(NSString *)aChannelName
@@ -28,87 +24,8 @@
 #pragma mark - FlutterPlugin
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-    
-    if([ChatGetReactionList isEqualToString:call.method]){
-        [self getReactionList:call.arguments channelName:call.method result:result];
-    } else if([ChatGroupAckCount isEqualToString:call.method]) {
-        [self getGroupAckCount:call.arguments channelName:call.method result:result];
-    } else if([ChatThread isEqualToString:call.method]) {
-        [self getChatThread:call.arguments channelName:call.method result:result];
-    }
-    // 450
-    else if ([getPinInfo isEqualToString:call.method]) {
-        [self getMessagePinInfo:call.arguments channelName:call.method result:result];
-    }
-    else {
-        [super handleMethodCall:call result:result];
-    }
+    [super handleMethodCall:call result:result];
 }
-
-
-- (void)getReaction:(NSDictionary *)param
-        channelName:(NSString *)aChannelName
-             result:(FlutterResult)result {
-    NSString *msgId = param[@"msgId"];
-    NSString *reaction = param[@"reaction"];
-    EMChatMessage *msg = [self getMessageWithId:msgId];
-    EMMessageReaction *msgReaction = [msg getReaction:reaction];
-    [self wrapperCallBack:result
-                  channelName:aChannelName
-                        error:nil
-                       object:[msgReaction toJson]];
-}
-
-- (void)getReactionList:(NSDictionary *)param
-        channelName:(NSString *)aChannelName
-                 result:(FlutterResult)result {
-    NSString *msgId = param[@"msgId"];
-    EMChatMessage *msg = [self getMessageWithId:msgId];
-    NSMutableArray *list = [NSMutableArray array];
-    for (EMMessageReaction *reaction in msg.reactionList) {
-        [list addObject:[reaction toJson]];
-    }
-    
-    [self wrapperCallBack:result
-                  channelName:aChannelName
-                        error:nil
-                   object:list.count > 0 ? list : nil];
-}
-
-- (void)getGroupAckCount:(NSDictionary *)param
-        channelName:(NSString *)aChannelName
-                 result:(FlutterResult)result {
-    NSString *msgId = param[@"msgId"];
-    EMChatMessage *msg = [self getMessageWithId:msgId];
-    [self wrapperCallBack:result
-                  channelName:aChannelName
-                        error:nil
-                       object:@(msg.groupAckCount)];
-    
-}
-
-- (void)getChatThread:(NSDictionary *)param
-          channelName:(NSString *)aChannelName
-               result:(FlutterResult)result {
-    NSString *msgId = param[@"msgId"];
-    EMChatMessage *msg = [self getMessageWithId:msgId];
-    [self wrapperCallBack:result
-              channelName:aChannelName
-                    error:nil
-                   object:[msg.chatThread toJson]] ;
-}
-
-- (void)getMessagePinInfo:(NSDictionary *)param
-          channelName:(NSString *)aChannelName
-               result:(FlutterResult)result {
-    NSString *msgId = param[@"msgId"];
-    EMChatMessage *msg = [self getMessageWithId:msgId];
-    [self wrapperCallBack:result
-              channelName:aChannelName
-                    error:nil
-                   object:[msg.pinnedInfo toJson]] ;
-}
-
 
 - (EMChatMessage *)getMessageWithId:(NSString *)aMessageId {
     return [EMClient.sharedClient.chatManager getMessageWithMessageId:aMessageId];

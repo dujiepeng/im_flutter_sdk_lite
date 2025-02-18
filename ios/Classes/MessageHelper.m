@@ -6,8 +6,6 @@
 //
 
 #import "MessageHelper.h"
-#import "ThreadHelper.h"
-#import "MessagePinInfoHelper.h"
 #import "EnumTools.h"
 
 
@@ -48,14 +46,7 @@
     msg.isReadAcked = [aJson[@"hasReadAck"] boolValue];
     msg.isDeliverAcked = [aJson[@"hasDeliverAck"] boolValue];
     msg.isRead = [aJson[@"hasRead"] boolValue];
-    msg.isNeedGroupAck = [aJson[@"needGroupAck"] boolValue];
     msg.deliverOnlineOnly = [aJson[@"deliverOnlineOnly"] boolValue];
-    // read only
-    // msg.groupAckCount = [aJson[@"groupAckCount"] intValue]
-    // msg.chatThread = [EMChatThread forJson:aJson[@"thread"]];
-    // msg.isContentReplaced = [aJson[@"isContentReplaced"] boolValue];
-    // msg.pinnedInfo = [EMMessagaPinInfo forJson:aJson[@"pinnedInfo"]];
-    msg.isChatThreadMessage = [aJson[@"isThread"] boolValue];
     msg.ext = aJson[@"attributes"];
     if (aJson[@"chatroomMessagePriority"]) {
         msg.priority = [aJson[@"chatroomMessagePriority"] integerValue];
@@ -78,23 +69,17 @@
     ret[@"hasRead"] = @(self.isRead);
     ret[@"hasDeliverAck"] = @(self.isDeliverAcked);
     ret[@"hasReadAck"] = @(self.isReadAcked);
-    ret[@"needGroupAck"] = @(self.isNeedGroupAck);
     ret[@"serverTime"] = @(self.timestamp);
-    ret[@"groupAckCount"] = @(self.groupAckCount);
     ret[@"attributes"] = self.ext;
     ret[@"localTime"] = @(self.localTime);
     ret[@"status"] = [NSNumber numberWithInteger:[EnumTools messageStatusToInt:self.status]];
     ret[@"chatType"] = [NSNumber numberWithInteger:[EnumTools chatTypeToInt:self.chatType]];
     ret[@"direction"] = [NSNumber numberWithInteger:[EnumTools messageDirectToInt:self.direction]];
-    ret[@"isThread"] = @(self.isChatThreadMessage);
     ret[@"body"] = [self.body toJson];
     ret[@"onlineState"] = @(self.onlineState);
     ret[@"deliverOnlineOnly"] = @(self.deliverOnlineOnly);
     ret[@"receiverList"] = self.receiverList;
     ret[@"broadcast"] = @(self.broadcast);
-    ret[@"isContentReplaced"] = @(self.isContentReplaced);
-    // flutter 使用 get 方法获取。
-    // ret[@"pinnedInfo"] = [self.pinnedInfo toJson];
     return ret;
 }
 
@@ -130,9 +115,6 @@
         case EMMessageBodyTypeCustom:
             ret = [EMCustomMessageBody fromJson:bodyJson];
             break;
-        case EMMessageBodyTypeCombine:
-            ret = [EMCombineMessageBody fromJson:bodyJson];
-            break;
         default:
             break;
     }
@@ -166,15 +148,12 @@
 
 + (EMMessageBody *)fromJson:(NSDictionary *)aJson {
     EMTextMessageBody *body = [[EMTextMessageBody alloc] initWithText:aJson[@"content"]];
-    body.targetLanguages = aJson[@"targetLanguages"];
     return body;
 }
 
 - (NSDictionary *)toJson {
     NSMutableDictionary *ret = [[super toJson] mutableCopy];
     ret[@"content"] = self.text;
-    ret[@"targetLanguages"] = self.targetLanguages;
-    ret[@"translations"] = self.translations;
     return ret;
 }
 
@@ -277,48 +256,6 @@
 
 @end
 
-@interface EMCombineMessageBody (Helper)
-+ (EMCombineMessageBody *)fromJson:(NSDictionary *)aJson;
-- (NSDictionary *)toJson;
-@end
-
-@implementation EMCombineMessageBody (Helper)
-
-+ (EMCombineMessageBody *)fromJson:(NSDictionary *)aJson {
-
-    NSString *title = aJson[@"title"];
-    NSString *summary = aJson[@"summary"];
-    NSArray *msgList = aJson[@"messageList"];
-    NSString *compatibleText = aJson[@"compatibleText"];
-    NSString *localPath = aJson[@"localPath"];
-    NSString *remotePath = aJson[@"remotePath"];
-    NSString *secret = aJson[@"secret"];
-    
-    EMCombineMessageBody *ret = [[EMCombineMessageBody alloc] initWithTitle:title
-                                                                    summary:summary
-                                                              compatibleText:compatibleText
-                                                               messageIdList:msgList];
-    
-    ret.remotePath = remotePath;
-    ret.secretKey = secret;
-    ret.localPath = localPath;
-    ret.downloadStatus = [EnumTools downloadStatusFromInt:[aJson[@"fileStatus"] integerValue]];
-    return ret;
-}
-
-- (NSDictionary *)toJson {
-    NSMutableDictionary *ret = [[super toJson] mutableCopy];
-    ret[@"title"] = self.title;
-    ret[@"summary"] = self.summary;
-    ret[@"compatibleText"] = self.compatibleText;
-    ret[@"localPath"] = self.localPath;
-    ret[@"remotePath"] = self.remotePath;
-    ret[@"secret"] = self.secretKey;
-    ret[@"fileStatus"] = @([EnumTools downloadStatusToInt:self.downloadStatus]);
-    return ret;
-}
-
-@end
 
 #pragma mark - file
 

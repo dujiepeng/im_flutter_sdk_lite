@@ -34,9 +34,6 @@
         case EMMessageBodyTypeCustom:
             return 7;
             break;
-        case EMMessageBodyTypeCombine:
-            return 8;
-            break;
         default:
             break;
     }
@@ -68,9 +65,6 @@
             break;
         case 7:
             return EMMessageBodyTypeCustom;
-            break;
-        case 8:
-            return EMMessageBodyTypeCombine;
             break;
         default:
             break;
@@ -134,46 +128,6 @@
     return EMChatroomPermissionTypeNone;
 }
 
-+(NSInteger)groupPermissionTypeToInt:(EMGroupPermissionType)value{
-    switch (value) {
-        case EMGroupPermissionTypeMember:
-            return 0;
-            break;
-        case EMGroupPermissionTypeAdmin:
-            return 1;
-            break;
-        case EMGroupPermissionTypeOwner:
-            return 2;
-            break;
-        case EMGroupPermissionTypeNone:
-            return 3;
-            break;
-        default:
-            break;
-    }
-    return 3;
-}
-
-+(EMGroupPermissionType)groupPermissionTypeFromInt:(NSInteger)value{
-    switch (value) {
-        case 0:
-            return EMGroupPermissionTypeMember;
-            break;
-        case 1:
-            return EMGroupPermissionTypeAdmin;
-            break;
-        case 2:
-            return EMGroupPermissionTypeOwner;
-            break;
-        case 3:
-            return EMGroupPermissionTypeNone;
-            break;
-        default:
-            break;
-    }
-    return EMGroupPermissionTypeNone;
-}
-
 +(NSInteger)searchDirectionToInt:(EMMessageSearchDirection)value{
     return value;
 }
@@ -187,22 +141,6 @@
 }
 
 +(EMConversationType)conversationTypeFromInt:(NSInteger)value{
-    return value;
-}
-
-+(NSInteger)silentModeParamTypeToInt:(EMSilentModeParamType)value{
-    return value;
-}
-
-+(EMSilentModeParamType)silentModeParamTypeFromInt:(NSInteger)value{
-    return value;
-}
-
-+(NSInteger)remindTypeToInt:(EMPushRemindType)value{
-    return value;
-}
-
-+(EMPushRemindType)remindTypeFromInt:(NSInteger)value{
     return value;
 }
 
@@ -222,19 +160,4 @@
     return value;
 }
 
-+(NSInteger)threadOperationToInt:(EMThreadOperation)value {
-    return value;
-}
-
-+(EMThreadOperation)threadOperationFromInt:(NSInteger)value {
-    return value;
-}
-
-+(NSInteger)reactionOperationToInt:(EMMessageReactionOperate)value {
-    return value;
-}
-
-+(EMMessageReactionOperate)recationOperationFromInt:(NSInteger)value {
-    return value;
-}
 @end

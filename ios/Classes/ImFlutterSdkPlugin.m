@@ -2,9 +2,7 @@
 
 #import "ChatManagerWrapper.h"
 #import "ClientWrapper.h"
-#import "ContactManagerWrapper.h"
 #import "ConversationWrapper.h"
-#import "GroupManagerWrapper.h"
 #import "ChatroomManagerWrapper.h"
 #import "ChatHeaders.h"
 #import <UserNotifications/UserNotifications.h>

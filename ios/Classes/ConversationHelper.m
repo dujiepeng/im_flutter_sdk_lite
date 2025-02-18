@@ -15,10 +15,8 @@
     ret[@"convId"] = self.conversationId;
     ret[@"type"] = [NSNumber numberWithInteger:[EnumTools conversationTypeFromInt:self.type]];
     ret[@"ext"] = self.ext;
-    ret[@"isThread"] = @(self.isChatThread);
     ret[@"isPinned"] = @(self.isPinned);
     ret[@"pinnedTime"] = @(self.pinnedTime);
-    ret[@"marks"] = self.marks;
     return ret;
 }
 

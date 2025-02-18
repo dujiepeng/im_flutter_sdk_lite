@@ -10,7 +10,6 @@ public class HelpTool {
         dbMsg.setLocalTime(msg.localTime());
         dbMsg.setStatus(msg.status());
         dbMsg.setAcked(msg.isAcked());
-        dbMsg.setIsChatThreadMessage(msg.isChatThreadMessage());
         dbMsg.setIsNeedGroupAck(msg.isNeedGroupAck());
         dbMsg.setDeliverAcked(msg.isDelivered());
         dbMsg.setUnread(msg.isUnread());

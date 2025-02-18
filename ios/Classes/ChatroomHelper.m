@@ -24,9 +24,6 @@
     ret[@"isAllMemberMuted"] = @(self.isMuteAllMembers);
     ret[@"announcement"] = self.announcement;
     ret[@"permissionType"] = [NSNumber numberWithInteger:[EnumTools chatRoomPermissionTypeToInt:self.permissionType]];
-    ret[@"muteExpireTimestamp"] = @(self.muteExpireTimestamp);
-    ret[@"isInWhitelist"] = @(self.isInWhitelist);
-    ret[@"createTimestamp"] = @(self.createTimestamp);
     
     return ret;
 }
