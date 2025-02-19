@@ -2,8 +2,6 @@
 
 import 'dart:math';
 
-import 'package:flutter/services.dart';
-
 import '../internal/inner_headers.dart';
 
 /// ~english
@@ -126,33 +124,6 @@ class EMMessage {
   bool hasReadAck = false;
 
   /// ~english
-  /// Whether read receipts are required for group messages.
-  /// - `true`: Yes.
-  /// - `false`: No.
-  ///
-  /// ~end
-  ///
-  /// ~chinese
-  /// 设置是否需要群组已读回执。
-  /// - `true`：是；
-  /// - `false`：否。
-  /// ~end
-  bool needGroupAck = false;
-
-  /// ~english
-  /// Whether the message is sent within a chat thread.
-  /// - `true`: Yes.
-  /// - `false`: No.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 是否为子区中的消息。
-  /// - `true`：是；
-  /// - `false`：否。
-  /// ~end
-  bool isChatThreadMessage = false;
-
-  /// ~english
   /// Whether the message is read.
   /// - `true`: Yes.
   /// - `false`: No.
@@ -258,46 +229,7 @@ class EMMessage {
   /// ~end
   late final bool onlineState;
 
-  /// ~english
-  ///  Whether it is a global broadcast message for all chat rooms in an app.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 是否是聊天室全局广播消息。
-  /// ~end
-  late final bool isBroadcast;
-
-  /// ~english
-  /// Whether the message content is replaced. It is valid after [EMOptions.useReplacedMessageContents] is enabled.
-  /// ~end
-  /// ~chinese
-  /// 消息内容是否被替换, 开启[EMOptions.useReplacedMessageContents]后有效
-  /// ~end
-  bool isContentReplaced = false;
-
   ChatRoomMessagePriority? _priority;
-
-  Future<MessagePinInfo?> pinInfo() async {
-    if (_msgId == null) {
-      return null;
-    }
-    Map req = {"msgId": msgId};
-    Map result = await _emMessageChannel.invokeMethod(
-      ChatMethodKeys.getPinInfo,
-      req,
-    );
-    try {
-      EMError.hasErrorFromResult(result);
-      if (result.containsKey(ChatMethodKeys.getPinInfo)) {
-        return result.getValue<MessagePinInfo>(ChatMethodKeys.getPinInfo,
-            callback: (obj) => MessagePinInfo.fromJson(obj));
-      } else {
-        return null;
-      }
-    } on EMError {
-      rethrow;
-    }
-  }
 
   /// ~english
   /// Sets the priority of chat room messages.
@@ -419,14 +351,12 @@ class EMMessage {
   EMMessage.createTxtSendMessage({
     required String targetId,
     required String content,
-    List<String>? targetLanguages,
     ChatType chatType = ChatType.Chat,
   }) : this.createSendMessage(
           chatType: chatType,
           to: targetId,
           body: EMTextMessageBody(
             content: content,
-            targetLanguages: targetLanguages,
           ),
         );
 
@@ -839,64 +769,6 @@ class EMMessage {
             to: targetId,
             body: EMCustomMessageBody(event: event, params: params));
 
-  /// ~english
-  /// Creates a combined message for sending.
-  ///
-  /// Param [targetId] The message recipient. The field setting is determined by the conversation type:
-  /// - For a one-to-one chat, it is the user ID of the peer user.
-  /// - For a group chat, it is the group ID.
-  /// - For a chat room, it is the chat room ID.
-  ///
-  /// Param [title]  The title of the combined message.
-  ///
-  /// Param [summary]  The summary of the combined message.
-  ///
-  /// Param [compatibleText] The compatible text of the combined message.
-  ///
-  /// Param [msgIds] The list of original messages included in the combined message.
-  ///
-  /// Param [chatType] The chat type. The default chat type is one-to-one chat. For the group chat or chat room, see [ChatType].
-  ///
-  /// **Return** The message instance.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 创建一条待发送的合并消息。
-  ///
-  /// Param [targetId] 消息接收方。该字段的设置取决于会话类型：
-  /// - 单聊：对方用户 ID；
-  /// - 群组：群组 ID；
-  /// - 聊天室：聊天室 ID。
-  ///
-  /// Param [title] 合并消息的标题。
-  ///
-  /// Param [summary] 合并消息的概要。
-  ///
-  /// Param [compatibleText] 合并消息的兼容信息。
-  ///
-  /// Param [msgIds] 合并消息的消息 ID 列表。
-  ///
-  /// Param [chatType] 聊天类型, 默认为单聊，如果是群聊或者聊天室，可以参考 [ChatType]。
-  ///
-  /// **Return** 消息体实例。
-  /// ~end
-  EMMessage.createCombineSendMessage({
-    required String targetId,
-    String? title,
-    String? summary,
-    String? compatibleText,
-    required List<String> msgIds,
-    ChatType chatType = ChatType.Chat,
-  }) : this.createSendMessage(
-            chatType: chatType,
-            to: targetId,
-            body: EMCombineMessageBody(
-              title: title,
-              summary: summary,
-              compatibleText: compatibleText,
-              messageList: msgIds,
-            ));
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data.putIfNotNull("from", from);
@@ -907,15 +779,13 @@ class EMMessage {
     data.putIfNotNull("hasRead", hasRead);
     data.putIfNotNull("hasReadAck", hasReadAck);
     data.putIfNotNull("hasDeliverAck", hasDeliverAck);
-    data.putIfNotNull("needGroupAck", needGroupAck);
     data.putIfNotNull("msgId", msgId);
     data.putIfNotNull("conversationId", this.conversationId ?? this.to);
     data.putIfNotNull("chatType", chatType.index);
     data.putIfNotNull("localTime", localTime);
     data.putIfNotNull("serverTime", serverTime);
     data.putIfNotNull("status", this.status.index);
-    data.putIfNotNull("isThread", isChatThreadMessage);
-    data.putIfNotNull('isContentReplaced', isContentReplaced);
+
     if (_priority != null) {
       data.putIfNotNull("chatroomMessagePriority", _priority!.index);
     }
@@ -936,20 +806,16 @@ class EMMessage {
       ..direction = MessageDirection.values[map["direction"]]
       ..hasRead = map.boolValue('hasRead')
       ..hasReadAck = map.boolValue('hasReadAck')
-      ..needGroupAck = map.boolValue('needGroupAck')
       ..hasDeliverAck = map.boolValue('hasDeliverAck')
       .._msgId = map["msgId"]
       ..conversationId = map["conversationId"]
       ..chatType = ChatType.values[map["chatType"]]
       ..localTime = map["localTime"] ?? 0
       ..serverTime = map["serverTime"] ?? 0
-      ..isChatThreadMessage = map["isThread"] ?? false
       ..onlineState = map["onlineState"] ?? true
       ..deliverOnlineOnly = map['deliverOnlineOnly'] ?? false
       ..status = MessageStatus.values[map["status"]]
-      ..receiverList = map["receiverList"]?.cast<String>()
-      ..isBroadcast = map["broadcast"] ?? false
-      ..isContentReplaced = map["isContentReplaced"] ?? false;
+      ..receiverList = map["receiverList"]?.cast<String>();
   }
 
   static EMMessageBody? _bodyFromMap(Map map) {
@@ -980,9 +846,7 @@ class EMMessage {
       case MessageType.VOICE:
         body = EMVoiceMessageBody.fromJson(map: map);
         break;
-      case MessageType.COMBINE:
-        body = EMCombineMessageBody.fromJson(map: map);
-        break;
+
       default:
     }
 
@@ -993,110 +857,6 @@ class EMMessage {
   String toString() {
     return toJson().toString();
   }
-
-  static const MethodChannel _emMessageChannel =
-      const MethodChannel('com.chat.im/chat_message', JSONMethodCodec());
-
-  /// ~english
-  /// Gets the Reaction list.
-  ///
-  /// **Return** The Reaction list
-  ///
-  /// **Throws** A description of the exception. See [EMError]
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取 Reaction 列表。
-  ///
-  /// **Return** Reaction 列表。
-  ///
-  /// **Throws** 如果有方法调用的异常会在这里抛出，可以看到具体错误原因。请参见 [EMError]。
-  /// ~end
-  Future<List<EMMessageReaction>> reactionList() async {
-    Map req = {"msgId": msgId};
-    Map result = await _emMessageChannel.invokeMethod(
-      ChatMethodKeys.getReactionList,
-      req,
-    );
-    try {
-      EMError.hasErrorFromResult(result);
-      List<EMMessageReaction> list = [];
-      result[ChatMethodKeys.getReactionList]?.forEach(
-        (element) => list.add(
-          EMMessageReaction.fromJson(element),
-        ),
-      );
-      return list;
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  /// ~english
-  /// Gets the number of members that have read the group message.
-  ///
-  /// **Return** group ack count
-  ///
-  /// **Throws** A description of the exception. See [EMError]
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取群消息已读人数。
-  ///
-  /// **Return** 群消息已读人数。
-  ///
-  /// **Throws** 如果有方法调用的异常会在这里抛出，可以看到具体错误原因。请参见 [EMError]。
-  /// ~end
-  Future<int> groupAckCount() async {
-    Map req = {"msgId": msgId};
-    Map result =
-        await _emMessageChannel.invokeMethod(ChatMethodKeys.groupAckCount, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      if (result.containsKey(ChatMethodKeys.groupAckCount)) {
-        return result[ChatMethodKeys.groupAckCount];
-      } else {
-        return 0;
-      }
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  /// ~english
-  /// Get an overview of the thread in the message (currently only supported by group messages)
-  ///
-  /// **Return** overview of the thread
-  ///
-  /// **Throws** A description of the exception. See [EMError]
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获得消息中的子区概述。
-  ///
-  /// @note
-  /// 目前，该方法只适用于群组消息。
-  ///
-  /// **Return** 子区概述内容。
-  ///
-  /// **Throws** 如果有方法调用的异常会在这里抛出，可以看到具体错误原因。请参见 [EMError]。
-  /// ~end
-  Future<EMChatThread?> chatThread() async {
-    Map req = {"msgId": msgId};
-    Map result =
-        await _emMessageChannel.invokeMethod(ChatMethodKeys.getChatThread, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      if (result.containsKey(ChatMethodKeys.getChatThread)) {
-        return result.getValue<EMChatThread>(ChatMethodKeys.getChatThread,
-            callback: (obj) => EMChatThread.fromJson(obj));
-      } else {
-        return null;
-      }
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
 }
 
 abstract class EMMessageBody {
@@ -1105,11 +865,7 @@ abstract class EMMessageBody {
   EMMessageBody.fromJson({
     required Map map,
     required this.type,
-  }) {
-    _operatorTime = map["operatorTime"];
-    _operatorId = map["operatorId"];
-    _operatorCount = map["operatorCount"];
-  }
+  }) {}
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -1130,33 +886,6 @@ abstract class EMMessageBody {
   /// 获取消息类型。
   /// ~end
   MessageType type;
-
-  /// ~english
-  /// Get the user ID of the operator that modified the message last time.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取最后一次消息修改的操作者的用户 ID。
-  /// ~end
-  String? _operatorId;
-
-  /// ~english
-  /// Get the UNIX timestamp of the last message modification, in milliseconds.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取最后一次消息修改的时间戳，单位为毫秒。
-  /// ~end
-  int? _operatorTime;
-
-  /// ~english
-  /// Get the number of times a message is modified.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取消息修改次数。
-  /// ~end
-  int? _operatorCount;
 }
 
 /// ~english
@@ -1605,16 +1334,11 @@ class EMTextMessageBody extends EMMessageBody {
   /// ~end
   EMTextMessageBody({
     required this.content,
-    this.targetLanguages,
   }) : super(type: MessageType.TXT);
 
   EMTextMessageBody.fromJson({required Map map})
       : super.fromJson(map: map, type: MessageType.TXT) {
     this.content = map["content"] ?? "";
-    this.targetLanguages = map.getList("targetLanguages");
-    if (map.containsKey("translations")) {
-      this.translations = map["translations"]?.cast<String, String>();
-    }
   }
 
   @override
@@ -1623,8 +1347,7 @@ class EMTextMessageBody extends EMMessageBody {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = super.toJson();
     data['content'] = this.content;
-    data.putIfNotNull("targetLanguages", this.targetLanguages);
-    data.putIfNotNull("translations", this.translations);
+
     return data;
   }
 
@@ -1636,51 +1359,6 @@ class EMTextMessageBody extends EMMessageBody {
   /// 文本消息内容。
   /// ~end
   late final String content;
-
-  /// ~english
-  /// The target languages for translation.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 翻译的目标语言。
-  /// ~end
-  List<String>? targetLanguages;
-
-  /// ~english
-  /// It is Map, where the key is target language and the value is translated content.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 译文。
-  /// ~end
-  Map<String, String>? translations;
-
-  /// ~english
-  /// Gets the user ID of the operator that modified the message last time.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取最后一次消息修改的操作者的用户 ID。
-  /// ~end
-  String? get lastModifyOperatorId => _operatorId;
-
-  /// ~english
-  /// Gets the UNIX timestamp of the last message modification, in milliseconds.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取最后一次消息修改的时间戳，单位为毫秒。
-  /// ~end
-  int? get lastModifyTime => _operatorTime;
-
-  /// ~english
-  /// Gets the number of times a message is modified.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取消息修改次数。
-  /// ~end
-  int? get modifyCount => _operatorCount;
 }
 
 /// ~english
@@ -1946,53 +1624,4 @@ class EMCustomMessageBody extends EMMessageBody {
   /// 自定义消息的键值对 Map 列表。
   /// ~end
   Map<String, String>? params;
-}
-
-class EMCombineMessageBody extends EMMessageBody {
-  EMCombineMessageBody({
-    this.title,
-    this.summary,
-    this.fileStatus = DownloadStatus.PENDING,
-    List<String>? messageList,
-    String? compatibleText,
-  })  : _compatibleText = compatibleText,
-        _messageList = messageList,
-        super(type: MessageType.COMBINE);
-
-  final String? title;
-  final String? summary;
-  final DownloadStatus fileStatus;
-  final List<String>? _messageList;
-  late final String? _compatibleText;
-
-  String? _localPath;
-  String? _remotePath;
-  String? _secret;
-
-  @override
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = super.toJson();
-    data.putIfNotNull("title", title);
-    data.putIfNotNull("summary", summary);
-    data.putIfNotNull("messageList", _messageList);
-    data.putIfNotNull("compatibleText", _compatibleText);
-    data.putIfNotNull("localPath", _localPath);
-    data.putIfNotNull("remotePath", _remotePath);
-    data.putIfNotNull("secret", _secret);
-    data.putIfNotNull("fileStatus", this.fileStatus.index);
-    return data;
-  }
-
-  factory EMCombineMessageBody.fromJson({required Map map}) {
-    var body = EMCombineMessageBody(
-      title: map["title"],
-      summary: map["summary"],
-      fileStatus: DownloadStatus.values[map["fileStatus"]],
-    );
-    body._localPath = map["localPath"];
-    body._remotePath = map["remotePath"];
-    body._secret = map["secret"];
-
-    return body;
-  }
 }

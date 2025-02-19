@@ -52,26 +52,18 @@ public class ChatManagerWrapper extends Wrapper implements MethodCallHandler {
         try {
             if (MethodKey.sendMessage.equals(call.method)) {
                 sendMessage(params, call.method, result);
-            } else if (MethodKey.resendMessage.equals(call.method)) {
-                resendMessage(params, call.method, result);
             } else if (MethodKey.ackMessageRead.equals(call.method)) {
                 ackMessageRead(params, call.method, result);
             } else if (MethodKey.ackConversationRead.equals(call.method)) {
                 ackConversationRead(params, call.method, result);
             } else if (MethodKey.recallMessage.equals(call.method)) {
                 recallMessage(params, call.method, result);
-            } else if (MethodKey.getConversation.equals(call.method)) {
-                getConversation(params, call.method, result);
-            } else if (MethodKey.getUnreadMessageCount.equals(call.method)) {
-                getUnreadMessageCount(params, call.method, result);
-            }else if (MethodKey.downloadAttachment.equals(call.method)) {
+            } else if (MethodKey.downloadAttachment.equals(call.method)) {
                 downloadAttachment(params, call.method, result);
             } else if (MethodKey.downloadThumbnail.equals(call.method)) {
                 downloadThumbnail(params, call.method, result);
             }  else if (MethodKey.fetchHistoryMessagesByOptions.equals(call.method)) {
                 fetchHistoryMessagesByOptions(params, call.method, result);
-            } else if (MethodKey.getMessage.equals(call.method)) {
-                getMessage(params, call.method, result);
             } else if (MethodKey.deleteRemoteConversation.equals(call.method)){
                 deleteRemoteConversation(params, call.method, result);
             }else if (MethodKey.removeMessagesFromServerWithTs.equals(call.method)) {
@@ -135,54 +127,6 @@ public class ChatManagerWrapper extends Wrapper implements MethodCallHandler {
         });
     }
 
-    private void resendMessage(JSONObject params, String channelName, Result result) throws JSONException {
-        EMMessage tempMsg = MessageHelper.fromJson(params);
-        EMMessage msg = EMClient.getInstance().chatManager().getMessage(tempMsg.getMsgId());
-        if (msg == null) {
-            msg = tempMsg;
-        }
-        msg.setStatus(EMMessage.Status.CREATE);
-        EMMessage finalMsg = msg;
-        final String localId = finalMsg.getMsgId();
-        finalMsg.setMessageStatusCallback(new EMWrapperCallBack(result, channelName, null) {
-            @Override
-            public void onSuccess() {
-                post(() -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("message", MessageHelper.toJson(finalMsg));
-                    map.put("localId", localId);
-                    messageChannel.invokeMethod(MethodKey.onMessageSuccess, map);
-                });
-            }
-
-            @Override
-            public void onProgress(int progress, String status) {
-                post(() -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("progress", progress);
-                    map.put("localId", localId);
-                    messageChannel.invokeMethod(MethodKey.onMessageProgressUpdate, map);
-                });
-            }
-
-
-            @Override
-            public void onError(int code, String desc) {
-                Map<String, Object> data = new HashMap<>();
-                data.put("code", code);
-                data.put("description", desc);
-                post(() -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("message", MessageHelper.toJson(finalMsg));
-                    map.put("localId", localId);
-                    map.put("error", data);
-                    messageChannel.invokeMethod(MethodKey.onMessageError, map);
-                });
-            }
-        });
-        EMClient.getInstance().chatManager().sendMessage(msg);
-        asyncRunnable(() -> onSuccess(result, channelName, MessageHelper.toJson(finalMsg)));
-    }
 
     private void ackMessageRead(JSONObject params, String channelName, Result result) throws JSONException {
         String msgId = params.getString("msg_id");
@@ -226,43 +170,6 @@ public class ChatManagerWrapper extends Wrapper implements MethodCallHandler {
             }
         });
     }
-
-    private void getMessage(JSONObject params, String channelName, Result result) throws JSONException {
-        String msgId = params.getString("msg_id");
-
-        asyncRunnable(() -> {
-            EMMessage msg = EMClient.getInstance().chatManager().getMessage(msgId);
-            if(msg == null) {
-                onSuccess(result, channelName, null);
-            }else {
-                onSuccess(result, channelName, MessageHelper.toJson(msg));
-            }
-        });
-    }
-
-    private void getConversation(JSONObject params, String channelName, Result result) throws JSONException {
-        String conId = params.getString("convId");
-        boolean createIfNeed = true;
-        if (params.has("createIfNeed")) {
-            createIfNeed = params.getBoolean("createIfNeed");
-        }
-
-        EMConversationType type = EnumTools.conversationTypeFromInt(params.getInt("type"));
-
-        boolean finalCreateIfNeed = createIfNeed;
-        asyncRunnable(() -> {
-            EMConversation conversation = EMClient.getInstance().chatManager().getConversation(conId, type, finalCreateIfNeed);
-            onSuccess(result, channelName, conversation != null ? ConversationHelper.toJson(conversation) : null);
-        });
-    }
-
-    private void getUnreadMessageCount(JSONObject params, String channelName, Result result) throws JSONException {
-        asyncRunnable(() -> {
-            int count = EMClient.getInstance().chatManager().getUnreadMessageCount();
-            onSuccess(result, channelName, count);
-        });
-    }
-
 
     private void removeMessagesFromServerWithTs(JSONObject params, String channelName, Result result) throws JSONException {
         String conversationId = params.getString("convId");

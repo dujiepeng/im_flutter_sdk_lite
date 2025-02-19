@@ -9,8 +9,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   assert(appKey.isNotEmpty, "appKey is empty");
 
-  EMOptions options = EMOptions.withAppKey(
-    appKey,
+  EMOptions options = EMOptions(
+    appKey: appKey,
     autoLogin: false,
     debugMode: true,
     usingHttpsOnly: false,
@@ -251,12 +251,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   // 当前回调中不会有 CMD 类型消息，CMD 类型消息通过 [EMChatManagerEventHandle.onCmdMessagesReceived] 回调接收
                 }
                 break;
-              case MessageType.COMBINE:
-                {
-                  _addLogToConsole(
-                    "receive combine message, from: ${msg.from}",
-                  );
-                }
             }
           }
         },
@@ -291,21 +285,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _signUp() async {
-    await EMClient.getInstance
-        .changeAppId(newAppId: '2e597744c44e4eed9b7c7c64e2ba2874');
+    if (_userId.isEmpty || _password.isEmpty) {
+      _addLogToConsole("username or password is null");
+      return;
+    }
 
-    // if (_userId.isEmpty || _password.isEmpty) {
-    //   _addLogToConsole("username or password is null");
-    //   return;
-    // }
-
-    // try {
-    //   _addLogToConsole("sign up...");
-    //   await EMClient.getInstance.createAccount(_userId, _password);
-    //   _addLogToConsole("sign up succeed, username: $_userId");
-    // } on EMError catch (e) {
-    //   _addLogToConsole("sign up failed, e: ${e.code} , ${e.description}");
-    // }
+    try {
+      _addLogToConsole("sign up...");
+      await EMClient.getInstance.createAccount(_userId, _password);
+      _addLogToConsole("sign up succeed, username: $_userId");
+    } on EMError catch (e) {
+      _addLogToConsole("sign up failed, e: ${e.code} , ${e.description}");
+    }
   }
 
   void _sendMessage() async {

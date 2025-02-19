@@ -428,7 +428,7 @@
 - (void)userAccountDidLoginFromOtherDevice:(NSString *)aDeviceName {
     [ListenerHandle.sharedInstance clearHandle];
     [self.channel invokeMethod:ChatOnUserDidLoginFromOtherDevice
-                     arguments:aDeviceName];
+                     arguments:@{@"deviceName": aDeviceName}];
 }
 
 

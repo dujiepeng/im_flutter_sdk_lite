@@ -66,7 +66,7 @@ class EMConnectionEventHandler {
   /// ~chinese
   /// 其他设备登录回调。
   /// ~end
-  final void Function(LoginExtensionInfo info)? onUserDidLoginFromOtherDevice;
+  final void Function(String info)? onUserDidLoginFromOtherDevice;
 
   /// ~english
   /// Occurs when the current chat user is removed from the server.
@@ -127,7 +127,7 @@ class EMConnectionEventHandler {
   /// ~end
   ///
   /// ~chinese
-  /// Agora token 即将过期时触发。
+  /// token 即将过期时触发。
   /// ~end
   final VoidCallback? onTokenWillExpire;
 
@@ -136,7 +136,7 @@ class EMConnectionEventHandler {
   /// ~end
   ///
   /// ~chinese
-  /// Agora token 已过期时触发。
+  /// token 已过期时触发。
   /// ~end
   final VoidCallback? onTokenDidExpire;
 
@@ -148,24 +148,6 @@ class EMConnectionEventHandler {
   /// 应用程序的日活跃用户数量（DAU）或月活跃用户数量（MAU）达到上限。
   /// ~end
   final VoidCallback? onAppActiveNumberReachLimit;
-
-  /// ~english
-  /// Occurs when the SDK starts pulling offline messages from the server.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 开始从服务器拉取离线消息时触发。
-  /// ~end
-  final VoidCallback? onOfflineMessageSyncStart;
-
-  /// ~english
-  /// Occurs when the SDK finishes pulling offline messages from the server.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 从服务器拉取离线消息结束时触发。
-  /// ~end
-  final VoidCallback? onOfflineMessageSyncFinish;
 
   /// ~english
   /// The chat connection listener callback.
@@ -193,10 +175,6 @@ class EMConnectionEventHandler {
   /// Param [onTokenDidExpire] The token has expired.
   ///
   /// Param [onAppActiveNumberReachLimit] The number of daily active users (DAU) or monthly active users (MAU) for the app has reached the upper limit.
-  ///
-  /// Param [onOfflineMessageSyncStart] Occurs when the SDK starts pulling offline messages from the server.
-  ///
-  /// Param [onOfflineMessageSyncFinish] Occurs when the SDK finishes pulling offline messages from the server.
   ///
   /// ~end
   ///
@@ -227,10 +205,6 @@ class EMConnectionEventHandler {
   ///
   /// Param [onAppActiveNumberReachLimit] 应用程序的日活跃用户数量（DAU）或月活跃用户数量（MAU）达到上限时回调。
   ///
-  /// Param [onOfflineMessageSyncStart] 开始从服务器拉取离线消息时触发。
-  ///
-  /// Param [onOfflineMessageSyncFinish] 从服务器拉取离线消息结束时触发。
-  ///
   /// ~end
   EMConnectionEventHandler({
     this.onConnected,
@@ -245,140 +219,6 @@ class EMConnectionEventHandler {
     this.onTokenWillExpire,
     this.onTokenDidExpire,
     this.onAppActiveNumberReachLimit,
-    this.onOfflineMessageSyncStart,
-    this.onOfflineMessageSyncFinish,
-  });
-}
-
-/// ~english
-/// The multi-device event handler.
-/// Listens for the callback for the current user's actions on other devices, including contact changes, group changes, and thread changes.
-///
-/// Adds a multi-device event handler:
-/// ```dart
-///   EMClient.getInstance.addMultiDeviceEventHandler((UNIQUE_HANDLER_ID, EMMultiDeviceEventHandler());
-/// ```
-///
-/// Removes a multi-device event handler:
-/// ```dart
-///   EMClient.getInstance.removeMultiDeviceEventHandler(UNIQUE_HANDLER_ID);
-/// ```
-/// ~end
-///
-/// ~chinese
-/// 多设备事件监听
-/// 监听当前用户在其他设备上的操作的回调，包括联系人更改、群组和 thread 等更改。
-///
-/// 添加监听:
-/// ```dart
-///   EMClient.getInstance.addMultiDeviceEventHandler((UNIQUE_HANDLER_ID, EMMultiDeviceEventHandler());
-/// ```
-///
-/// 移除监听:
-/// ```dart
-///   EMClient.getInstance.removeMultiDeviceEventHandler(UNIQUE_HANDLER_ID);
-/// ```
-/// ~end
-class EMMultiDeviceEventHandler {
-  /// ~english
-  /// The multi-device event of contact.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 多设备联系人事件。
-  /// ~end
-  final void Function(
-    EMMultiDevicesEvent event,
-    String userId,
-    String? ext,
-  )? onContactEvent;
-
-  /// ~english
-  /// The multi-device event of group.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 多设备群组事件。
-  /// ~end
-  final void Function(
-    EMMultiDevicesEvent event,
-    String groupId,
-    List<String>? userIds,
-  )? onGroupEvent;
-
-  /// ~english
-  /// The multi-device event of thread.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 多设备 Thread 事件。
-  /// ~end
-  final void Function(
-    EMMultiDevicesEvent event,
-    String chatThreadId,
-    List<String> userIds,
-  )? onChatThreadEvent;
-
-  /// ~english
-  /// Callback received by other devices after historical messages in a conversation are removed from the server in a multi-device login scenario.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 开启多设备后对单个会话删除漫游消息后对其他设备的回调。
-  /// ~end
-  final void Function(
-    String conversationId,
-    String deviceId,
-  )? onRemoteMessagesRemoved;
-
-  /// ~english
-  /// The multi-device event callback for the operation of a conversation.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 开启多设备后单个会话操作的多设备事件回调。
-  /// ~end
-  final void Function(
-    EMMultiDevicesEvent event,
-    String conversationId,
-    EMConversationType type,
-  )? onConversationEvent;
-
-  /// ~english
-  /// The multi-device event handler.
-  ///
-  /// Param [onContactEvent] The multi-device event of contact.
-  ///
-  /// Param [onGroupEvent] The multi-device event of group.
-  ///
-  /// Param [onChatThreadEvent] The multi-device event of thread.
-  ///
-  /// Param [onRemoteMessagesRemoved] The multi-device event of historical messages removed from the server.
-  ///
-  /// Param [onConversationEvent] The multi-device event callback for the operation of a conversation.
-  ///
-  /// ~end
-  ///
-  /// ~chinese
-  /// 多设备事件。
-  ///
-  /// Param [onContactEvent] 多设备联系人事件。
-  ///
-  /// Param [onGroupEvent] 多设备群组事件。
-  ///
-  /// Param [onChatThreadEvent] 多设备 Thread 事件。
-  ///
-  /// Param [onRemoteMessagesRemoved] 多设备漫游消息删除事件。
-  ///
-  /// Param [onConversationEvent] 多设备单个会话操作事件。
-  ///
-  /// ~end
-  EMMultiDeviceEventHandler({
-    this.onContactEvent,
-    this.onGroupEvent,
-    this.onChatThreadEvent,
-    this.onRemoteMessagesRemoved,
-    this.onConversationEvent,
   });
 }
 
@@ -450,25 +290,6 @@ class EMChatEventHandler {
   final void Function(List<EMMessage> messages)? onMessagesRead;
 
   /// ~english
-  /// Occurs when a read receipt is received for a group message.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 收到群组消息的已读回执的回调。
-  /// ~end
-  final void Function(List<EMGroupMessageAck> groupMessageAcks)?
-      onGroupMessageRead;
-
-  /// ~english
-  /// Occurs when the update for the group message read status is received.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 群消息已读变更。
-  /// ~end
-  final VoidCallback? onReadAckForGroupMessageUpdated;
-
-  /// ~english
   /// Occurs when a delivery receipt is received.
   /// ~end
   ///
@@ -487,15 +308,6 @@ class EMChatEventHandler {
   /// 已收到的消息被撤回的回调。
   /// ~end
   final void Function(List<EMMessage> messages)? onMessagesRecalled;
-
-  /// ~english
-  /// Occurs when a received message is recalled.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 已收到的消息被撤回的回调。
-  /// ~end
-  final void Function(List<RecallMessageInfo>)? onMessagesRecalledInfo;
 
   /// ~english
   /// Occurs when the conversation updated.
@@ -529,44 +341,6 @@ class EMChatEventHandler {
   final void Function(String from, String to)? onConversationRead;
 
   /// ~english
-  /// Occurs when the Reaction data changes.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 消息表情回复（Reaction）变化监听器。
-  /// ~end
-  final void Function(List<EMMessageReactionEvent> events)?
-      onMessageReactionDidChange;
-
-  /// ~english
-  /// Occurs when the message content is modified.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 收到消息内容变化。
-  /// ~end
-  final void Function(EMMessage message, String operatorId, int operationTime)?
-      onMessageContentChanged;
-
-  /// ~english
-  /// Occurs when the message pinning status changes.
-  ///
-  /// This callback is triggered when the message pinning status changes.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 消息置顶状态变化。
-  ///
-  /// 当消息置顶状态发生变化时触发此回调。
-  /// ~end
-  final void Function(
-    String messageId,
-    String conversationId,
-    MessagePinOperation pinOperation,
-    MessagePinInfo pinInfo,
-  )? onMessagePinChanged;
-
-  /// ~english
   /// The chat event handler.
   ///
   /// Param [onMessagesReceived] Occurs when a message is received.
@@ -575,10 +349,6 @@ class EMChatEventHandler {
   ///
   /// Param [onMessagesRead] Occurs when a read receipt is received for a one-to-one message.
   ///
-  /// Param [onGroupMessageRead] Occurs when a read receipt is received for a group message.
-  ///
-  /// Param [onReadAckForGroupMessageUpdated] Occurs when the group message read status is received.
-  ///
   /// Param [onMessagesDelivered] Occurs when a delivery receipt is received.
   ///
   /// Param [onMessagesRecalled] Occurs when a received message is recalled.
@@ -586,14 +356,6 @@ class EMChatEventHandler {
   /// Param [onConversationsUpdate] Occurs when a conversation is updated.
   ///
   /// Param [onConversationRead] Occurs when a conversation read receipt is received.
-  ///
-  /// Param [onMessageReactionDidChange] Occurs when the Reaction data changes.
-  ///
-  /// Param [onMessageContentChanged] Occurs when the message content is modified.
-  ///
-  /// Param [onMessagePinChanged] Occurs when the message pinning status changes.
-  ///
-  /// Param [onMessagesRecalledInfo] Occurs when a received message is recalled.
   /// ~end
   ///
   /// ~chinese
@@ -605,10 +367,6 @@ class EMChatEventHandler {
   ///
   /// Param [onMessagesRead] 收到单聊消息已读回执的回调。
   ///
-  /// Param [onGroupMessageRead] 收到群组消息的已读回执的回调。
-  ///
-  /// Param [onReadAckForGroupMessageUpdated] 群消息已读变更。
-  ///
   /// Param [onMessagesDelivered] 收到消息已送达回执的回调。
   ///
   /// Param [onMessagesRecalled] 已收到的消息被撤回的回调。
@@ -617,28 +375,16 @@ class EMChatEventHandler {
   ///
   /// Param [onConversationRead] 收到会话已读回执的回调。
   ///
-  /// Param [onMessageReactionDidChange] 消息表情回复（Reaction）变化监听器。
-  ///
-  /// Param [onMessageContentChanged] 收到消息内容变化。
-  ///
-  /// Param [onMessagePinChanged] 消息置顶状态变化。
-  ///
-  /// Param [onMessagesRecalledInfo] 已收到的消息被撤回的回调。
   /// ~end
-  EMChatEventHandler(
-      {this.onMessagesReceived,
-      this.onCmdMessagesReceived,
-      this.onMessagesRead,
-      this.onGroupMessageRead,
-      this.onReadAckForGroupMessageUpdated,
-      this.onMessagesDelivered,
-      this.onMessagesRecalled,
-      this.onConversationsUpdate,
-      this.onConversationRead,
-      this.onMessageReactionDidChange,
-      this.onMessageContentChanged,
-      this.onMessagePinChanged,
-      this.onMessagesRecalledInfo});
+  EMChatEventHandler({
+    this.onMessagesReceived,
+    this.onCmdMessagesReceived,
+    this.onMessagesRead,
+    this.onMessagesDelivered,
+    this.onMessagesRecalled,
+    this.onConversationsUpdate,
+    this.onConversationRead,
+  });
 }
 
 /// ~english
@@ -980,769 +726,4 @@ class EMChatRoomEventHandler {
 /// EMClient.getInstance.chatThreadManager.removeEventHandler(UNIQUE_HANDLER_ID);
 /// ```
 /// ~end
-class EMChatThreadEventHandler {
-  /// ~english
-  /// Occurs when a message thread is created.
-  ///
-  /// Each member of the group to which the message thread belongs can receive the callback.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 子区创建回调。
-  /// ~end
-  final void Function(
-    EMChatThreadEvent event,
-  )? onChatThreadCreate;
 
-  /// ~english
-  /// Occurs when a message thread is destroyed.
-  ///
-  /// Each member of the group to which the message thread belongs can receive the callback.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 子区解散事件。
-  /// 子区所属群组的所有成员均可调用该方法。
-  /// ~end
-  final void Function(
-    EMChatThreadEvent event,
-  )? onChatThreadDestroy;
-
-  /// ~english
-  /// Occurs when a message thread is updated.
-  ///
-  /// This callback is triggered when the message thread name is changed or a threaded reply is added or recalled.
-  ///
-  /// Each member of the group to which the message thread belongs can receive the callback.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 子区更新回调。
-  /// 子区所属群组的所有成员均可调用该方法。
-  /// ~end
-  final void Function(
-    EMChatThreadEvent event,
-  )? onChatThreadUpdate;
-
-  /// ~english
-  /// Occurs when the current user is removed from the message thread by the group owner or a group admin to which the message thread belongs.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 管理员移除子区用户的回调。
-  /// ~end
-  final void Function(
-    EMChatThreadEvent event,
-  )? onUserKickOutOfChatThread;
-
-  /// ~english
-  /// The message thread listener callback.
-  ///
-  /// Param [onChatThreadCreate] A message thread is created. All members in the group to which the thread belongs receive this callback.
-  ///
-  /// Param [onChatThreadDestroy] A message thread is destroyed. All members in the group to which the destroyed thread belongs receive this callback.
-  ///
-  /// Param [onChatThreadUpdate] A message thread is updated. All members in the group to which the updated thread belongs receive this callback.
-  ///
-  /// Param [onUserKickOutOfChatThread]  The current user is removed from the message thread by the group owner or a group admin to which the message thread belongs. The current user removed from the thread receives the callback.
-  /// ~end
-  ///
-  /// ~chinese
-  /// Thread 事件监听。
-  ///
-  /// Param [onChatThreadCreate] 子区创建回调。
-  ///
-  /// Param [onChatThreadDestroy] 子区解散事件, 子区所属群组的所有成员均可调用该方法。
-  ///
-  /// Param [onChatThreadUpdate] 子区更新回调, 子区所属群组的所有成员均可调用该方法。
-  ///
-  /// Param [onUserKickOutOfChatThread] 管理员移除子区用户的回调。
-  /// ~end
-  EMChatThreadEventHandler({
-    this.onChatThreadCreate,
-    this.onChatThreadDestroy,
-    this.onChatThreadUpdate,
-    this.onUserKickOutOfChatThread,
-  });
-}
-
-/// ~english
-/// The contact event handler.
-///
-/// Occurs when the contact changes, including adding or deleting contacts and accept or rejecting friend requests.
-///
-/// Adds a contact event handler:
-/// ```dart
-///   EMClient.getInstance.contactManager.addEventHandler(UNIQUE_HANDLER_ID, EMContactEventHandler());
-/// ```
-///
-/// Removes a contact event handler:
-/// ```dart
-///   EMClient.getInstance.contactManager.removeEventHandler(UNIQUE_HANDLER_ID);
-/// ```
-/// ~end
-///
-/// ~chinese
-/// 联系人事件监听
-///
-/// 添加监听:
-/// ```dart
-///   EMClient.getInstance.contactManager.addEventHandler(UNIQUE_HANDLER_ID, EMContactEventHandler());
-/// ```
-///
-/// 移除监听:
-/// ```dart
-///   EMClient.getInstance.contactManager.removeEventHandler(UNIQUE_HANDLER_ID);
-/// ```
-/// ~end
-class EMContactEventHandler {
-  /// ~english
-  /// Occurs when user is added as a contact by another user.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 添加好友回调。
-  /// ~end
-  final void Function(
-    String userId,
-  )? onContactAdded;
-
-  /// ~english
-  /// Occurs when a user is removed from the contact list by another user.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 删除好友回调。
-  /// ~end
-  final void Function(
-    String userId,
-  )? onContactDeleted;
-
-  /// ~english
-  /// Occurs when a user receives a friend request.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 好友申请回调。
-  /// ~end
-  final void Function(
-    String userId,
-    String? reason,
-  )? onContactInvited;
-
-  /// ~english
-  /// Occurs when a friend request is approved.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 发出的好友申请被对方同意。
-  /// ~end
-  final void Function(
-    String userId,
-  )? onFriendRequestAccepted;
-
-  /// ~english
-  /// Occurs when a friend request is declined.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 发出的好友申请被对方拒绝。
-  /// ~end
-  final void Function(
-    String userId,
-  )? onFriendRequestDeclined;
-
-  /// ~english
-  /// The contact updates listener callback.
-  ///
-  /// Param [onContactAdded] Current user is added as a contact by another user.
-  ///
-  /// Param [onContactDeleted] Current user is removed from the contact list by another user.
-  ///
-  /// Param [onContactInvited] Current user receives a friend request.
-  ///
-  /// Param [onFriendRequestAccepted] A friend request is approved.
-  ///
-  /// Param [onFriendRequestDeclined] A friend request is declined.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 联系人事件监听。
-  ///
-  /// Param [onContactAdded] 添加好友回调。
-  ///
-  /// Param [onContactDeleted] 删除好友回调。
-  ///
-  /// Param [onContactInvited] 好友申请回调。
-  ///
-  /// Param [onFriendRequestAccepted] 发出的好友申请被对方同意。
-  ///
-  /// Param [onFriendRequestDeclined] 发出的好友申请被对方拒绝。
-  /// ~end
-  EMContactEventHandler({
-    this.onContactAdded,
-    this.onContactDeleted,
-    this.onContactInvited,
-    this.onFriendRequestAccepted,
-    this.onFriendRequestDeclined,
-  });
-}
-
-/// ~english
-/// The group event handler.
-///
-/// Occurs when the following group events happens: joining a group, approving or declining a group request, and kicking a user out of a group.
-///
-/// Adds a group event handler:
-/// ```dart
-///   EMClient.getInstance.groupManager.addEventHandler(UNIQUE_HANDLER_ID, EMGroupEventHandler());
-/// ```
-///
-/// Removes a group event handler:
-/// ```dart
-///   EMClient.getInstance.groupManager.removeEventHandler(UNIQUE_HANDLER_ID);
-/// ```
-/// ~end
-///
-/// ~chinese
-/// 群组事件监听
-///
-/// 添加监听:
-/// ```dart
-///   EMClient.getInstance.groupManager.addEventHandler(UNIQUE_HANDLER_ID, EMGroupEventHandler());
-/// ```
-///
-/// 移除监听:
-/// ```dart
-///   EMClient.getInstance.groupManager.removeEventHandler(UNIQUE_HANDLER_ID);
-/// ```
-/// ~end
-class EMGroupEventHandler {
-  /// ~english
-  /// Occurs when a member is set as an admin.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 成员设置为管理员的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String admin,
-  )? onAdminAddedFromGroup;
-
-  /// ~english
-  /// Occurs when a member's admin privileges are removed.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 取消成员的管理员权限的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String admin,
-  )? onAdminRemovedFromGroup;
-
-  /// ~english
-  /// Occurs when all group members are muted or unmuted.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 全员禁言状态变化回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    bool isAllMuted,
-  )? onAllGroupMemberMuteStateChanged;
-
-  /// ~english
-  /// Occurs when one or more group members are added to the allowlist.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 成员加入群组白名单回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    List<String> members,
-  )? onAllowListAddedFromGroup;
-
-  /// ~english
-  /// Occurs when one or more members are removed from the allowlist.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 成员移出群组白名单回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    List<String> members,
-  )? onAllowListRemovedFromGroup;
-
-  /// ~english
-  /// Occurs when the announcement is updated.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 群公告更新回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String announcement,
-  )? onAnnouncementChangedFromGroup;
-
-  /// ~english
-  /// Occurs when the group invitation is accepted automatically.
-  /// For settings, See [EMOptions.autoAcceptGroupInvitation].
-  /// The SDK will join the group before notifying the app of the acceptance of the group invitation.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 当前用户自动同意入群邀请的回调。
-  /// 设置请见 [EMOptions.autoAcceptGroupInvitation].
-  /// ~end
-  final void Function(
-    String groupId,
-    String inviter,
-    String? inviteMessage,
-  )? onAutoAcceptInvitationFromGroup;
-
-  /// ~english
-  /// Occurs when a group is destroyed.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 当前用户收到群组被解散的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String? groupName,
-  )? onGroupDestroyed;
-
-  /// ~english
-  /// Occurs when a group invitation is accepted.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 当前用户收到对端用户同意入群邀请触发的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String invitee,
-    String? reason,
-  )? onInvitationAcceptedFromGroup;
-
-  /// ~english
-  /// Occurs when a group invitation is declined.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 当前用户收到群组邀请被拒绝的回调。
-  /// 该回调是由当前用户收到对端用户拒绝入群邀请触发的。例如，用户 B 拒绝了用户 A 的群组邀请，用户 A 会收到该回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String invitee,
-    String? reason,
-  )? onInvitationDeclinedFromGroup;
-
-  /// ~english
-  /// Occurs when the user receives a group invitation.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 当前用户收到入群邀请的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String? groupName,
-    String inviter,
-    String? reason,
-  )? onInvitationReceivedFromGroup;
-
-  /// ~english
-  /// Occurs when a member proactively leaves the group.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 群组成员主动退出回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String member,
-  )? onMemberExitedFromGroup;
-
-  /// ~english
-  /// Occurs when a user joins a group.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 新成员加入群组的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String member,
-  )? onMemberJoinedFromGroup;
-
-  /// ~english
-  /// Occurs when one or more group members are muted.
-  ///
-  /// Note: The mute function is different from a block list.
-  /// A user, when muted, can still see group messages, but cannot send messages in the group.
-  /// However, a user on the block list can neither see nor send group messages.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 有成员被禁言回调。
-  /// 用户禁言后，将无法在群中发送消息，但可查看群组中的消息，而黑名单中的用户无法查看和发送群组消息。
-  /// ~end
-  final void Function(
-    String groupId,
-    List<String> mutes,
-    int? muteExpire,
-  )? onMuteListAddedFromGroup;
-
-  /// ~english
-  /// Occurs when one or more group members are unmuted.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 有成员被解除禁言的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    List<String> mutes,
-  )? onMuteListRemovedFromGroup;
-
-  /// ~english
-  /// Occurs when the group ownership is transferred.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 转移群主权限的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String newOwner,
-    String oldOwner,
-  )? onOwnerChangedFromGroup;
-
-  /// ~english
-  /// Occurs when a group request is accepted.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 对端用户接受当前用户发送的群组申请的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String? groupName,
-    String accepter,
-  )? onRequestToJoinAcceptedFromGroup;
-
-  /// ~english
-  /// Occurs when a group request is declined.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 对端用户拒绝群组申请的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String? groupName,
-    String? decliner,
-    String? reason,
-    String? applicant,
-  )? onRequestToJoinDeclinedFromGroup;
-
-  /// ~english
-  /// Occurs when the group owner or administrator receives a group request from a user.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 对端用户接收群组申请的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String? groupName,
-    String applicant,
-    String? reason,
-  )? onRequestToJoinReceivedFromGroup;
-
-  /// ~english
-  /// Occurs when a shared file is added to a group.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 群组添加共享文件回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    EMGroupSharedFile sharedFile,
-  )? onSharedFileAddedFromGroup;
-
-  /// ~english
-  /// Occurs when the group detail information is updated.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 群详情变更回调。
-  /// ~end
-  final void Function(
-    EMGroup group,
-  )? onSpecificationDidUpdate;
-
-  /// ~english
-  /// Occurs when the group is enabled or disabled.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 群是禁用状态变更。
-  /// ~end
-  final void Function(
-    String groupId,
-    bool isDisable,
-  )? onDisableChanged;
-
-  /// ~english
-  /// Occurs when a shared file is removed from a group.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 群组删除共享文件回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String fileId,
-  )? onSharedFileDeletedFromGroup;
-
-  /// ~english
-  /// Occurs when the current user is removed from the group by the group admin.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 当前用户被移出群组时的回调。
-  /// ~end
-  final void Function(
-    String groupId,
-    String? groupName,
-  )? onUserRemovedFromGroup;
-
-  /// ~english
-  /// Occurs when a custom attribute(s) of a group member is/are changed.
-  ///
-  /// Param [groupId] The group ID.
-  ///
-  /// Param [userId] The user ID of the group member whose custom attributes are changed.
-  ///
-  /// Param [attributes] The modified custom attributes, in key-value format.
-  ///
-  /// Param [operatorId] The user ID of the operator.
-  ///
-  /// ~end
-  ///
-  /// ~chinese
-  /// 群组成员自定义属性有变更。
-  ///
-  /// Param [groupId] 群组 ID。
-  ///
-  /// Param [userId] 自定义属性变更的群成员的用户 ID。
-  ///
-  /// Param [attributes] 修改后的自定义属性，key-value 格式。
-  ///
-  /// Param [operatorId] 操作者的用户 ID。
-  /// ~end
-  final void Function(
-    String groupId,
-    String userId,
-    Map<String, String>? attributes,
-    String? operatorId,
-  )? onAttributesChangedOfGroupMember;
-
-  /// ~english
-  /// The group manager listener callback.
-  ///
-  /// Param [onAdminAddedFromGroup] A member is set as an admin.
-  ///
-  /// Param [onAdminRemovedFromGroup] A member's admin privileges are removed.
-  ///
-  /// Param [onAllGroupMemberMuteStateChanged] All group members are muted or unmuted.
-  ///
-  /// Param [onAllowListAddedFromGroup] One or more group members are muted.
-  ///
-  /// Param [onAllowListRemovedFromGroup] One or more group members are unmuted.
-  ///
-  /// Param [onAnnouncementChangedFromGroup] The announcement is updated.
-  ///
-  /// Param [onAutoAcceptInvitationFromGroup] The group invitation is accepted automatically.
-  ///
-  /// Param [onGroupDestroyed] A group is destroyed.
-  ///
-  /// Param [onInvitationAcceptedFromGroup] A group invitation is accepted.
-  ///
-  /// Param [onInvitationDeclinedFromGroup] A group invitation is declined.
-  ///
-  /// Param [onInvitationReceivedFromGroup] The user receives a group invitation.
-  ///
-  /// Param [onMemberExitedFromGroup] A member proactively leaves the group.
-  ///
-  /// Param [onMemberJoinedFromGroup] A user joins a group.
-  ///
-  /// Param [onMuteListAddedFromGroup] One or more group members are muted.
-  ///
-  /// Param [onMuteListRemovedFromGroup] One or more group members are unmuted.
-  ///
-  /// Param [onOwnerChangedFromGroup] The group ownership is transferred.
-  ///
-  /// Param [onRequestToJoinAcceptedFromGroup] A group request is accepted.
-  ///
-  /// Param [onRequestToJoinDeclinedFromGroup] A group request is declined.
-  ///
-  /// Param [onRequestToJoinReceivedFromGroup] The group owner or administrator receives a group request from a user.
-  ///
-  /// Param [onSharedFileAddedFromGroup] A shared file is added to a group.
-  ///
-  /// Param [onSharedFileDeletedFromGroup] A shared file is removed from a group.
-  ///
-  /// Param [onUserRemovedFromGroup] Current user is removed from the group by the group admin.
-  ///
-  /// Param [onSpecificationDidUpdate] The group detail information is updated.
-  ///
-  /// Param [onDisableChanged] Te group is enabled or disabled.
-  ///
-  /// Param [onAttributesChangedOfGroupMember] A custom attribute(s) of a group member is/are changed.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 群组时间监听
-  ///
-  /// Param [onAdminAddedFromGroup] 成员设置为管理员的回调。
-  ///
-  /// Param [onAdminRemovedFromGroup] 取消成员的管理员权限的回调。
-  ///
-  /// Param [onAllGroupMemberMuteStateChanged] 全员禁言状态变化回调。
-  ///
-  /// Param [onAllowListAddedFromGroup] 成员加入群组白名单回调。
-  ///
-  /// Param [onAllowListRemovedFromGroup] 成员移出群组白名单回调。
-  ///
-  /// Param [onAnnouncementChangedFromGroup] 群公告更新回调。
-  ///
-  /// Param [onAutoAcceptInvitationFromGroup] 当前用户自动同意入群邀请的回调, 设置请见 [EMOptions.autoAcceptGroupInvitation]。
-  ///
-  /// Param [onGroupDestroyed] 当前用户收到群组被解散的回调。
-  ///
-  /// Param [onInvitationAcceptedFromGroup] 当前用户收到对端用户同意入群邀请触发的回调。
-  ///
-  /// Param [onInvitationDeclinedFromGroup] 当前用户收到群组邀请被拒绝的回调。
-  ///
-  /// Param [onInvitationReceivedFromGroup] 当前用户收到入群邀请的回调。
-  ///
-  /// Param [onMemberExitedFromGroup] 群组成员主动退出回调。
-  ///
-  /// Param [onMemberJoinedFromGroup] 新成员加入群组的回调。
-  ///
-  /// Param [onMuteListAddedFromGroup] 有成员被禁言回调, 用户禁言后，将无法在群中发送消息，但可查看群组中的消息，而黑名单中的用户无法查看和发送群组消息。
-  ///
-  /// Param [onMuteListRemovedFromGroup] 有成员被解除禁言的回调。
-  ///
-  /// Param [onOwnerChangedFromGroup] 转移群主权限的回调。
-  ///
-  /// Param [onRequestToJoinAcceptedFromGroup] 对端用户接受当前用户发送的群组申请的回调。
-  ///
-  /// Param [onRequestToJoinDeclinedFromGroup] 对端用户拒绝群组申请的回调。
-  ///
-  /// Param [onRequestToJoinReceivedFromGroup] 对端用户接收群组申请的回调。
-  ///
-  /// Param [onSharedFileAddedFromGroup] 群组添加共享文件回调。
-  ///
-  /// Param [onSharedFileDeletedFromGroup] 群组删除共享文件回调。
-  ///
-  /// Param [onUserRemovedFromGroup] 当前用户被移出群组时的回调。
-  ///
-  /// Param [onSpecificationDidUpdate] 群详情变更回调。
-  ///
-  /// Param [onDisableChanged] 群是禁用状态变更。
-  ///
-  /// Param [onAttributesChangedOfGroupMember] 群组成员自定义属性有变更。
-  /// ~end
-  EMGroupEventHandler({
-    this.onAdminAddedFromGroup,
-    this.onAdminRemovedFromGroup,
-    this.onAllGroupMemberMuteStateChanged,
-    this.onAllowListAddedFromGroup,
-    this.onAllowListRemovedFromGroup,
-    this.onAnnouncementChangedFromGroup,
-    this.onAutoAcceptInvitationFromGroup,
-    this.onGroupDestroyed,
-    this.onInvitationAcceptedFromGroup,
-    this.onInvitationDeclinedFromGroup,
-    this.onInvitationReceivedFromGroup,
-    this.onMemberExitedFromGroup,
-    this.onMemberJoinedFromGroup,
-    this.onMuteListAddedFromGroup,
-    this.onMuteListRemovedFromGroup,
-    this.onOwnerChangedFromGroup,
-    this.onRequestToJoinAcceptedFromGroup,
-    this.onRequestToJoinDeclinedFromGroup,
-    this.onRequestToJoinReceivedFromGroup,
-    this.onSharedFileAddedFromGroup,
-    this.onSharedFileDeletedFromGroup,
-    this.onUserRemovedFromGroup,
-    this.onSpecificationDidUpdate,
-    this.onDisableChanged,
-    this.onAttributesChangedOfGroupMember,
-  });
-}
-
-/// ~english
-/// The presence event handler.
-///
-/// Occurs when the following presence events happens: presence status changed.
-///
-/// Adds a presence event handler:
-/// ```dart
-///   EMClient.getInstance.presenceManager.addEventHandler(UNIQUE_HANDLER_ID, EMPresenceEventHandler());
-/// ```
-///
-/// Removes a presence event handler:
-/// ```dart
-///   EMClient.getInstance.presenceManager.removeEventHandler(UNIQUE_HANDLER_ID);
-/// ```
-/// ~end
-///
-/// ~chinese
-/// 订阅用户状态变更监听
-///
-/// 添加监听:
-/// ```dart
-///   EMClient.getInstance.presenceManager.addEventHandler(UNIQUE_HANDLER_ID, EMPresenceEventHandler());
-/// ```
-///
-/// 移除监听:
-/// ```dart
-///   EMClient.getInstance.presenceManager.removeEventHandler(UNIQUE_HANDLER_ID);
-/// ```
-/// ~end
-class EMPresenceEventHandler {
-  /// ~english
-  /// Occurs when the presence state of a subscribed user changes.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 收到被订阅用户的在线状态发生变化。
-  /// ~end
-  final Function(List<EMPresence> list)? onPresenceStatusChanged;
-
-  /// ~english
-  /// The presence manager listener callback.
-  ///
-  /// Param [onPresenceStatusChanged] The presence state of a subscribed user changes.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 订阅用户状态变更监听。
-  /// ~end
-  EMPresenceEventHandler({
-    this.onPresenceStatusChanged,
-  });
-}

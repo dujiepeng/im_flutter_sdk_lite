@@ -267,6 +267,16 @@ public class ClientWrapper extends Wrapper implements MethodCallHandler {
             }
 
             @Override
+            public void onLogout(int errorCode, String info) {
+                if (errorCode == 206) {
+                    ListenerHandle.getInstance().clearHandle();
+                    Map<String, String> attributes = new HashMap<>();
+                    attributes.put("deviceName", info);
+                    post(() -> channel.invokeMethod(MethodKey.onUserDidLoginFromOtherDevice, attributes));
+                }
+            }
+
+            @Override
             public void onDisconnected(int errorCode) {
                 if (errorCode == 207) {
                     ListenerHandle.getInstance().clearHandle();

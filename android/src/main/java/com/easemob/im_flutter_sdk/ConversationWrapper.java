@@ -25,11 +25,7 @@ public class ConversationWrapper extends Wrapper implements MethodCallHandler{
         JSONObject param = (JSONObject)call.arguments;
 
         try { 
-            if (MethodKey.getUnreadMsgCount.equals(call.method)) {
-                getUnreadMsgCount(param, call.method, result);
-            }
-
-            else if (MethodKey.getLatestMessage.equals(call.method)) {
+            if (MethodKey.getLatestMessage.equals(call.method)) {
                 getLatestMessage(param, call.method, result);
             }
             else if (MethodKey.getLatestMessageFromOthers.equals(call.method)) {
@@ -46,11 +42,6 @@ public class ConversationWrapper extends Wrapper implements MethodCallHandler{
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-
-    private void getUnreadMsgCount(JSONObject params, String channelName, Result result) throws JSONException {
-        EMConversation conversation = conversationWithParam(params);
-        asyncRunnable(()-> onSuccess(result, channelName,  conversation.getUnreadMsgCount()));
     }
 
     private void getLatestMessage(JSONObject params, String channelName, Result result) throws JSONException {

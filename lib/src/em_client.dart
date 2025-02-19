@@ -17,20 +17,10 @@ import 'internal/inner_headers.dart';
 class EMClient {
   static EMClient? _instance;
   final EMChatManager _chatManager = EMChatManager();
-  final EMContactManager _contactManager = EMContactManager();
-  final EMChatRoomManager _chatRoomManager = EMChatRoomManager();
-  final EMGroupManager _groupManager = EMGroupManager();
-  final EMPushManager _pushManager = EMPushManager();
-  final EMUserInfoManager _userInfoManager = EMUserInfoManager();
 
-  final EMPresenceManager _presenceManager = EMPresenceManager();
-  final EMChatThreadManager _chatThreadManager = EMChatThreadManager();
+  final EMChatRoomManager _chatRoomManager = EMChatRoomManager();
 
   final Map<String, EMConnectionEventHandler> _connectionEventHandler = {};
-  final Map<String, EMMultiDeviceEventHandler> _multiDeviceEventHandler = {};
-
-  // ignore: unused_field
-  EMProgressManager? _progressManager;
 
   EMOptions? _options;
 
@@ -75,7 +65,6 @@ class EMClient {
   String? get currentUserId => _currentUserId;
 
   EMClient._internal() {
-    _progressManager = EMProgressManager();
     _addNativeMethodCallHandler();
   }
 
@@ -87,8 +76,8 @@ class EMClient {
       } else if (call.method == ChatMethodKeys.onDisconnected) {
         return _onDisconnected();
       } else if (call.method == ChatMethodKeys.onUserDidLoginFromOtherDevice) {
-        LoginExtensionInfo info = LoginExtensionInfo.fromJson(argMap!);
-        _onUserDidLoginFromOtherDevice(info);
+        String deviceName = argMap?['deviceName'] ?? "";
+        _onUserDidLoginFromOtherDevice(deviceName);
       } else if (call.method == ChatMethodKeys.onUserDidRemoveFromServer) {
         _onUserDidRemoveFromServer();
       } else if (call.method == ChatMethodKeys.onUserDidForbidByServer) {
@@ -101,18 +90,6 @@ class EMClient {
         _onUserKickedByOtherDevice();
       } else if (call.method == ChatMethodKeys.onUserAuthenticationFailed) {
         _onUserAuthenticationFailed();
-      } else if (call.method == ChatMethodKeys.onMultiDeviceGroupEvent) {
-        _onMultiDeviceGroupEvent(argMap!);
-      } else if (call.method == ChatMethodKeys.onMultiDeviceContactEvent) {
-        _onMultiDeviceContactEvent(argMap!);
-      } else if (call.method == ChatMethodKeys.onMultiDeviceThreadEvent) {
-        _onMultiDeviceThreadEvent(argMap!);
-      } else if (call.method ==
-          ChatMethodKeys.onMultiDeviceRemoveMessagesEvent) {
-        _onMultiDeviceRoamMessagesRemovedEvent(argMap!);
-      } else if (call.method ==
-          ChatMethodKeys.onMultiDevicesConversationEvent) {
-        _onMultiDevicesConversationEvent(argMap!);
       } else if (call.method == ChatMethodKeys.onSendDataToFlutter) {
         _onReceiveCustomData(argMap!);
       } else if (call.method == ChatMethodKeys.onTokenWillExpire) {
@@ -121,10 +98,6 @@ class EMClient {
         _onTokenDidExpire(argMap);
       } else if (call.method == ChatMethodKeys.onAppActiveNumberReachLimit) {
         _onAppActiveNumberReachLimit(argMap);
-      } else if (call.method == ChatMethodKeys.onOfflineMessageSyncStart) {
-        _onOfflineMessageSyncStart(argMap);
-      } else if (call.method == ChatMethodKeys.onOfflineMessageSyncFinish) {
-        _onOfflineMessageSyncFinish(argMap);
       }
     });
   }
@@ -194,73 +167,6 @@ class EMClient {
   /// ~end
   void clearConnectionEventHandles() {
     _connectionEventHandler.clear();
-  }
-
-  /// ~english
-  /// Adds the multi-device event handler. After calling this method, you can handle for new multi-device events when they arrive.
-  ///
-  /// Param [identifier] The custom handler identifier, which is used to find the corresponding handler.
-  ///
-  /// Param [handler] The handler multi-device event. See [EMMultiDeviceEventHandler].
-  /// ~end
-  ///
-  /// ~chinese
-  /// 添加多设备事件监听。
-  ///
-  /// Param [identifier] 多设备事件监听对应 ID。
-  ///
-  /// Param [handler] 多设备事件监听。 请见 [EMMultiDeviceEventHandler]。
-  /// ~end
-  void addMultiDeviceEventHandler(
-    String identifier,
-    EMMultiDeviceEventHandler handler,
-  ) {
-    _multiDeviceEventHandler[identifier] = handler;
-  }
-
-  /// ~english
-  /// Removes the multi-device event handler.
-  ///
-  /// Param [identifier] The custom handler identifier.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 移除多设备事件监听。
-  ///
-  /// Param [identifier] 要移除多设备事件监听对应的 ID。
-  /// ~end
-  void removeMultiDeviceEventHandler(String identifier) {
-    _multiDeviceEventHandler.remove(identifier);
-  }
-
-  /// ~english
-  /// Gets the multi-device event handler.
-  ///
-  /// Param [identifier] The custom handler identifier.
-  ///
-  /// **Return** The multi-device event handler.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取多设备事件监听。
-  ///
-  /// Param [identifier] 多设备事件监听对应的 ID。
-  ///
-  /// **Return** 多设备事件监听。
-  /// ~end
-  EMMultiDeviceEventHandler? getMultiDeviceEventHandler(String identifier) {
-    return _multiDeviceEventHandler[identifier];
-  }
-
-  /// ~english
-  /// Clears all multi-device event handlers.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 清除所有多设备事件监听。
-  /// ~end
-  void clearMultiDeviceEventHandles() {
-    _multiDeviceEventHandler.clear();
   }
 
   /// ~english
@@ -488,36 +394,6 @@ class EMClient {
     }
   }
 
-  @Deprecated('Use [loginWithToken] instead')
-
-  /// ~english
-  /// Logs in to the chat server by user ID and Agora token. This method supports automatic login.
-  ///
-  /// Another method to login to chat server is to login with user ID and token, See [login].
-  ///
-  /// Param [userId] The user Id.
-  ///
-  /// Param [agoraToken] The Agora token.
-  ///
-  /// **Throws** A description of the exception. See [EMError].
-  /// ~end
-  ///
-  /// ~chinese
-  /// 用声网 Token 登录服务器，该方法支持自动登录。
-  ///
-  /// **Note**
-  /// 通过 token 登录服务器的方法见[login]。
-  ///
-  /// Param [userId] 用户 ID。
-  ///
-  /// Param [agoraToken] Token。
-  ///
-  /// **Throws**  如果有异常会在这里抛出，包含错误码和错误描述，详见 [EMError]。
-  /// ~end
-  Future<void> loginWithAgoraToken(String userId, String agoraToken) async {
-    return login(userId, agoraToken, false);
-  }
-
   /// ~english
   /// Logs in to the chat server with a token.
   ///
@@ -648,76 +524,6 @@ class EMClient {
   }
 
   /// ~english
-  /// Updates the App Key, which is the unique identifier to access Agora Chat.
-  ///
-  /// You can retrieve the new App Key from Agora Console.
-  ///
-  /// As this key controls all access to Agora Chat for your app, you can only update the key when the current user is logged out.
-  ///
-  /// Param [newAppKey] The App Key. Ensure that you set this parameter.
-  ///
-  /// **Throws** A description of the exception. See [EMError].
-  /// ~end
-  ///
-  /// ~chinese
-  /// 修改 App Key。
-  ///
-  /// @note
-  /// 只有在未登录状态才能修改 App Key。
-  ///
-  /// Param [newAppKey] App Key，请确保设置该参数。
-  ///
-  /// **Throws**  如果有异常会在这里抛出，包含错误码和错误描述，详见 [EMError]。
-  /// ~end
-  Future<bool> changeAppKey({required String newAppKey}) async {
-    EMLog.v('changeAppKey: $newAppKey');
-    Map req = {'appKey': newAppKey};
-    Map result =
-        await ClientChannel.invokeMethod(ChatMethodKeys.changeAppKey, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      return result.boolValue(ChatMethodKeys.changeAppKey);
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  /// ~english
-  /// Updates the App Id, which is the unique identifier to access Agora Chat.
-  ///
-  /// You can retrieve the new App Key from Agora Console.
-  ///
-  /// As this key controls all access to Agora Chat for your app, you can only update the key when the current user is logged out.
-  ///
-  /// Param [newAppId] The App Id. Ensure that you set this parameter.
-  ///
-  /// **Throws** A description of the exception. See [EMError].
-  /// ~end
-  ///
-  /// ~chinese
-  /// 修改 App Id
-  ///
-  /// @note
-  /// 只有在未登录状态才能修改 App Id
-  ///
-  /// Param [newAppId] App Id
-  ///
-  /// **Throws**  如果有异常会在这里抛出，包含错误码和错误描述，详见 [EMError]。
-  /// ~end
-  Future<bool> changeAppId({required String newAppId}) async {
-    EMLog.v('newAppId: $newAppId');
-    Map req = {'appId': newAppId};
-    Map result =
-        await ClientChannel.invokeMethod(ChatMethodKeys.changeAppId, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      return result.boolValue(ChatMethodKeys.changeAppKey);
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  /// ~english
   /// Compresses the debug log into a gzip archive.
   ///
   /// Best practice is to delete this debug archive as soon as it is no longer used.
@@ -745,179 +551,6 @@ class EMClient {
     }
   }
 
-  @Deprecated('Use [fetchLoggedInDevices] instead')
-
-  /// ~english
-  /// Gets the list of currently logged-in devices of a specified account.
-  ///
-  /// Param [userId] The user ID.
-  ///
-  /// Param [password] The password.
-  ///
-  /// **Return** The list of the logged-in devices.
-  ///
-  /// **Throws** A description of the exception. See [EMError].
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取指定账号下登录的在线设备列表。
-  ///
-  /// Param [userId] 用户 ID。
-  ///
-  /// Param [password] 密码。
-  ///
-  /// **Return**  获取到到设备列表。
-  ///
-  /// **Throws**  如果有异常会在这里抛出，包含错误码和错误描述，详见 [EMError]。
-  /// ~end
-  Future<List<EMDeviceInfo>> getLoggedInDevicesFromServer(
-      {required String userId, required String password}) async {
-    Map req = {'username': userId, 'password': password};
-    Map result = await ClientChannel.invokeMethod(
-        ChatMethodKeys.getLoggedInDevicesFromServer, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      List<EMDeviceInfo> list = [];
-      result[ChatMethodKeys.getLoggedInDevicesFromServer]?.forEach((info) {
-        list.add(EMDeviceInfo.fromJson(info));
-      });
-      return list;
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  /// ~english
-  /// Gets the list of currently logged-in devices of a specified account.
-  ///
-  /// Param [userId] The user ID.
-  ///
-  /// Param [pwdOrToken] The password or token.
-  ///
-  /// Param [isPwd] Whether a password or token is used: (Default)`true`: A password is used; `false`: A token is used.
-  ///
-  /// **Return** The list of the logged-in devices.
-  ///
-  /// **Throws** A description of the exception. See [EMError].
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取指定账号下登录的在线设备列表。
-  ///
-  /// Param [userId] 用户 ID。
-  ///
-  /// Param [pwdOrToken] 密码或者 token。
-  ///
-  /// Param [isPwd] 是否使用密码或 token：（默认）`true`：使用密码；`false`：使用 token。
-  ///
-  /// **Return**  获取到到设备列表。
-  ///
-  /// **Throws**  如果有异常会在这里抛出，包含错误码和错误描述，详见 [EMError]。
-  /// ~end
-  Future<List<EMDeviceInfo>> fetchLoggedInDevices({
-    required String userId,
-    required String pwdOrToken,
-    bool isPwd = true,
-  }) async {
-    Map req = {'username': userId, 'password': pwdOrToken, 'isPwd': isPwd};
-    Map result = await ClientChannel.invokeMethod(
-        ChatMethodKeys.getLoggedInDevicesFromServer, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      List<EMDeviceInfo> list = [];
-      result[ChatMethodKeys.getLoggedInDevicesFromServer]?.forEach((info) {
-        list.add(EMDeviceInfo.fromJson(info));
-      });
-      return list;
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  /// ~english
-  /// Forces the specified account to log out from the specified device.
-  ///
-  /// Param [userId] The account you want to force to log out.
-  ///
-  /// Param [pwdOrToken] The password or token.
-  ///
-  /// Param [resource] The device ID. For how to fetch the device ID, See [EMDeviceInfo.resource].
-  ///
-  /// **Throws** A description of the exception. See [EMError].
-  /// ~end
-  ///
-  /// ~chinese
-  /// 将指定账号登录的指定设备踢下线。
-  ///
-  /// Param [userId] 用户 ID。
-  ///
-  /// Param [pwdOrToken] 密码 / token。
-  ///
-  /// Param [resource] 设备 ID，详见 [EMDeviceInfo.resource]。
-  ///
-  /// **Throws**  如果有异常会在这里抛出，包含错误码和错误描述，详见 [EMError]。
-  /// ~end
-  Future<void> kickDevice({
-    required String userId,
-    required String pwdOrToken,
-    required String resource,
-    bool isPwd = true,
-  }) async {
-    EMLog.v('kickDevice: $userId, "******"');
-    Map req = {
-      'username': userId,
-      'password': pwdOrToken,
-      'resource': resource,
-      'isPwd': isPwd,
-    };
-    Map result =
-        await ClientChannel.invokeMethod(ChatMethodKeys.kickDevice, req);
-    try {
-      EMError.hasErrorFromResult(result);
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  /// ~english
-  /// Forces the specified account to log out from all devices.
-  ///
-  /// Param [userId] The account you want to force to log out from all the devices.
-  ///
-  /// Param [pwdOrToken] The password or token.
-  ///
-  /// Param [isPwd] Whether a password or token is used: (Default)`true`: A password is used; `false`: A token is used.
-  ///
-  /// **Throws** A description of the exception. See [EMError].
-  /// ~end
-  ///
-  /// ~chinese
-  /// 将指定账号登录的所有设备都踢下线。
-  ///
-  /// Param [userId] 用户 ID。
-  ///
-  /// Param [pwdOrToken] 密码 或 token。
-  ///
-  /// Param [isPwd] 是否使用密码或 token：（默认）`true`：使用密码；`false`：使用 token。
-  ///
-  /// **Throws**  如果有异常会在这里抛出，包含错误码和错误描述，详见 [EMError]。
-  ///
-  /// ~end
-  Future<void> kickAllDevices({
-    required String userId,
-    required String pwdOrToken,
-    bool isPwd = true,
-  }) async {
-    Map req = {'username': userId, 'password': pwdOrToken, 'isPwd': isPwd};
-    Map result =
-        await ClientChannel.invokeMethod(ChatMethodKeys.kickAllDevices, req);
-    try {
-      EMError.hasErrorFromResult(result);
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
   Future<void> _onConnected() async {
     for (var handler in _connectionEventHandler.values) {
       handler.onConnected?.call();
@@ -930,7 +563,7 @@ class EMClient {
     }
   }
 
-  Future<void> _onUserDidLoginFromOtherDevice(LoginExtensionInfo info) async {
+  Future<void> _onUserDidLoginFromOtherDevice(String info) async {
     for (var handler in _connectionEventHandler.values) {
       handler.onUserDidLoginFromOtherDevice?.call(info);
     }
@@ -990,65 +623,6 @@ class EMClient {
     }
   }
 
-  void _onOfflineMessageSyncStart(Map? map) {
-    for (var item in _connectionEventHandler.values) {
-      item.onOfflineMessageSyncStart?.call();
-    }
-  }
-
-  void _onOfflineMessageSyncFinish(Map? map) {
-    for (var item in _connectionEventHandler.values) {
-      item.onOfflineMessageSyncFinish?.call();
-    }
-  }
-
-  Future<void> _onMultiDeviceGroupEvent(Map map) async {
-    EMMultiDevicesEvent event = convertIntToEMMultiDevicesEvent(map['event'])!;
-    String target = map['target'];
-    List<String>? users = map.getList("users");
-
-    for (var handler in _multiDeviceEventHandler.values) {
-      handler.onGroupEvent?.call(event, target, users);
-    }
-  }
-
-  Future<void> _onMultiDeviceContactEvent(Map map) async {
-    EMMultiDevicesEvent event = convertIntToEMMultiDevicesEvent(map['event'])!;
-    String target = map['target'];
-    String? ext = map['ext'];
-
-    for (var handler in _multiDeviceEventHandler.values) {
-      handler.onContactEvent?.call(event, target, ext);
-    }
-  }
-
-  Future<void> _onMultiDeviceThreadEvent(Map map) async {
-    EMMultiDevicesEvent event = convertIntToEMMultiDevicesEvent(map['event'])!;
-    String target = map['target'] ?? '';
-    List<String> users = map.getList("users") ?? [];
-
-    for (var handler in _multiDeviceEventHandler.values) {
-      handler.onChatThreadEvent?.call(event, target, users);
-    }
-  }
-
-  Future<void> _onMultiDeviceRoamMessagesRemovedEvent(Map map) async {
-    String convId = map['convId'];
-    String deviceId = map['deviceId'];
-    for (var handler in _multiDeviceEventHandler.values) {
-      handler.onRemoteMessagesRemoved?.call(convId, deviceId);
-    }
-  }
-
-  Future<void> _onMultiDevicesConversationEvent(Map map) async {
-    EMMultiDevicesEvent event = convertIntToEMMultiDevicesEvent(map['event'])!;
-    String convId = map['convId'];
-    EMConversationType type = EMConversationType.values[map['convType']];
-    for (var handler in _multiDeviceEventHandler.values) {
-      handler.onConversationEvent?.call(event, convId, type);
-    }
-  }
-
   void _onReceiveCustomData(Map map) {
     customEventHandler?.call(map);
   }
@@ -1069,21 +643,6 @@ class EMClient {
   }
 
   /// ~english
-  /// Gets the [EMContactManager] class. Make sure to call it after the EMClient has been initialized.
-  ///
-  /// **Return** The `EMContactManager` class.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取 [EMContactManager] 类。请确保在 EMClient 初始化之后调用本方法，详见 [EMClient.init]。
-  ///
-  /// **Return** `EMContactManager` 类。
-  /// ~end
-  EMContactManager get contactManager {
-    return _contactManager;
-  }
-
-  /// ~english
   /// Gets the [EMChatRoomManager] class. Make sure to call it after the EMClient has been initialized.
   ///
   /// **Return** The `EMChatRoomManager` class.
@@ -1098,84 +657,8 @@ class EMClient {
     return _chatRoomManager;
   }
 
-  /// ~english
-  /// Gets the [EMGroupManager] class. Make sure to call it after the EMClient has been initialized.
-  ///
-  /// **Return** The `EMGroupManager` class.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取 [EMGroupManager] 类。请确保在 EMClient 初始化之后调用本方法，详见 [EMClient.init]。
-  ///
-  /// **Return** `EMGroupManager` 类。
-  /// ~end
-  EMGroupManager get groupManager {
-    return _groupManager;
-  }
-
-  /// ~english
-  /// Gets the [EMPushManager] class. Make sure to call it after the EMClient has been initialized.
-  ///
-  /// **Return** The `EMPushManager` class.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取 [EMPushManager] 类。请确保在 EMClient 初始化之后调用本方法，详见 [EMClient.init]。
-  ///
-  /// **Return** `EMPushManager` 类。
-  /// ~end
-  EMPushManager get pushManager {
-    return _pushManager;
-  }
-
-  /// ~english
-  /// Gets the [EMUserInfoManager] class. Make sure to call it after the EMClient has been initialized.
-  ///
-  /// **Return** The `EMUserInfoManager` class.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取 [EMUserInfoManager] 类。请确保在 EMClient 初始化之后调用本方法，详见 [EMClient.init]。
-  ///
-  /// **Return** `EMUserInfoManager` 类。
-  /// ~end
-  EMUserInfoManager get userInfoManager {
-    return _userInfoManager;
-  }
-
-  /// ~english
-  /// Gets the [EMChatThreadManager] class. Make sure to call it after the EMClient has been initialized.
-  ///
-  /// **Return** The `EMChatThreadManager` class.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取 [EMChatThreadManager] 类。请确保在 EMClient 初始化之后调用本方法，详见 [EMClient.init]。
-  ///
-  /// **Return** `EMChatThreadManager` 类。
-  /// ~end
-  EMChatThreadManager get chatThreadManager {
-    return _chatThreadManager;
-  }
-
-  /// ~english
-  /// Gets the [EMPresenceManager] class. Make sure to call it after the EMClient has been initialized.
-  ///
-  /// **Return** The `EMPresenceManager` class.
-  /// ~end
-  ///
-  /// ~chinese
-  /// 获取 [EMPresenceManager] 类。请确保在 EMClient 初始化之后调用本方法，详见 [EMClient.init]。
-  ///
-  /// **Return** `EMPresenceManager` 类。
-  /// ~end
-  EMPresenceManager get presenceManager {
-    return _presenceManager;
-  }
-
   void _clearAllInfo() {
     _currentUserId = null;
-    _userInfoManager.clearUserInfoCache();
   }
 
   // 481
@@ -1203,34 +686,6 @@ class EMClient {
     }
   }
 
-  /// ~english
-  ///
-  Future<void> updateLoginExtensionInfoSetting(String extension) async {
-    Map req = {'extension': extension};
-    Map result = await ClientChannel.invokeMethod(
-        ChatMethodKeys.updateLoginExtensionInfo, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      _options = _options?.copyWith(loginExtension: extension);
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  Future<void> updateDeleteMessagesWhenLeaveGroupSetting(
-      bool deleteMessagesWhenLeaveGroup) async {
-    Map req = {'deleteMessagesWhenLeaveGroup': deleteMessagesWhenLeaveGroup};
-    Map result = await ClientChannel.invokeMethod(
-        ChatMethodKeys.updateDeleteMessagesWhenLeaveGroupSetting, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      _options = _options?.copyWith(
-          deleteMessagesWhenLeaveGroup: deleteMessagesWhenLeaveGroup);
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
   Future<void> updateDeleteMessageWhenLeaveRoomSetting(
       bool deleteMessageWhenLeaveRoom) async {
     Map req = {'deleteMessageWhenLeaveRoom': deleteMessageWhenLeaveRoom};
@@ -1252,34 +707,6 @@ class EMClient {
     try {
       EMError.hasErrorFromResult(result);
       _options = _options?.copyWith(roomOwnerCanLeave: roomOwnerCanLeave);
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  Future<void> updateAutoAcceptGroupInvitationSetting(
-      bool autoAcceptGroupInvitation) async {
-    Map req = {'autoAcceptGroupInvitation': autoAcceptGroupInvitation};
-    Map result = await ClientChannel.invokeMethod(
-        ChatMethodKeys.updateAutoAcceptGroupInvitationSetting, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      _options = _options?.copyWith(
-          autoAcceptGroupInvitation: autoAcceptGroupInvitation);
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  Future<void> updateAutoAcceptFriendInvitationSetting(
-      bool acceptInvitationAlways) async {
-    Map req = {'acceptInvitationAlways': acceptInvitationAlways};
-    Map result = await ClientChannel.invokeMethod(
-        ChatMethodKeys.updateAcceptInvitationAlways, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      _options =
-          _options?.copyWith(acceptInvitationAlways: acceptInvitationAlways);
     } on EMError catch (e) {
       throw e;
     }
@@ -1332,32 +759,6 @@ class EMClient {
       EMError.hasErrorFromResult(result);
       _options =
           _options?.copyWith(sortMessageByServerTime: sortMessageByServerTime);
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  Future<void> updateMessagesReceiveCallbackIncludeSendSetting(
-      bool includeSend) async {
-    Map req = {'includeSend': includeSend};
-    Map result = await ClientChannel.invokeMethod(
-        ChatMethodKeys.updateMessagesReceiveCallbackIncludeSendSetting, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      _options =
-          _options?.copyWith(messagesReceiveCallbackIncludeSend: includeSend);
-    } on EMError catch (e) {
-      throw e;
-    }
-  }
-
-  Future<void> updateRegradeMessagesAsReadSetting(bool isRead) async {
-    Map req = {'isRead': isRead};
-    Map result = await ClientChannel.invokeMethod(
-        ChatMethodKeys.updateRegradeMessagesSetting, req);
-    try {
-      EMError.hasErrorFromResult(result);
-      _options = _options?.copyWith(regardImportMessagesAsRead: isRead);
     } on EMError catch (e) {
       throw e;
     }

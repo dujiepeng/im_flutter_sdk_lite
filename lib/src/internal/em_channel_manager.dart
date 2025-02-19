@@ -16,8 +16,3 @@ const MethodChannel ClientChannel = const MethodChannel(
   '$channelPrefix/chat_client',
   JSONMethodCodec(),
 );
-
-const MethodChannel PushChannel = const MethodChannel(
-  '$channelPrefix/chat_push_manager',
-  JSONMethodCodec(),
-);

@@ -29,13 +29,7 @@
 #pragma mark - FlutterPlugin
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-     if ([ChatGetUnreadMsgCount isEqualToString:call.method]) {
-        [self getUnreadMsgCount:call.arguments
-                    channelName:call.method
-                         result:result];
-    } 
-   
-    else if ([ChatGetLatestMsg isEqualToString:call.method]) {
+     if ([ChatGetLatestMsg isEqualToString:call.method]) {
         [self getLatestMessage:call.arguments
                    channelName:call.method
                         result:result];
@@ -72,19 +66,6 @@
 }
 
 #pragma mark - Actions
-- (void)getUnreadMsgCount:(NSDictionary *)param
-              channelName:(NSString *)aChannelName
-                   result:(FlutterResult)result
-{
-    __weak typeof(self) weakSelf = self;
-    [self getConversationWithParam:param
-                        completion:^(EMConversation *conversation) {
-        [weakSelf wrapperCallBack:result
-                      channelName:aChannelName
-                            error:nil
-                           object:@(conversation.unreadMessagesCount)];
-    }];
-}
 
 - (void)getLatestMessage:(NSDictionary *)param
              channelName:(NSString *)aChannelName

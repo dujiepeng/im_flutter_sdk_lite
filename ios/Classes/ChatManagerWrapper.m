@@ -61,18 +61,6 @@
         [self recallMessage:call.arguments
                 channelName:call.method
                      result:result];
-    } else if ([ChatGetConversation isEqualToString:call.method]) {
-        [self getConversation:call.arguments
-                  channelName:call.method
-                       result:result];
-    }  else if ([ChatGetMessage isEqualToString:call.method]) {
-        [self getMessageWithMessageId:call.arguments
-                          channelName:call.method
-                               result:result];
-    }  else if ([ChatGetUnreadMessageCount isEqualToString:call.method]) {
-        [self getUnreadMessageCount:call.arguments
-                        channelName:call.method
-                             result:result];
     } else if ([ChatDownloadAttachment isEqualToString:call.method]) {
         [self downloadAttachment:call.arguments
                      channelName:call.method
@@ -81,18 +69,6 @@
         [self downloadThumbnail:call.arguments
                     channelName:call.method
                          result:result];
-    } else if ([ChatDownloadMessageAttachmentInCombine isEqualToString:call.method]) {
-        [self downloadMessageAttachmentInCombine:call.arguments
-                                     channelName:call.method
-                                          result:result];
-    } else if ([ChatDownloadMessageThumbnailInCombine isEqualToString:call.method]) {
-        [self downloadMessageThumbnailInCombine:call.arguments
-                                    channelName:call.method
-                                         result:result];
-    } else if ([ChatDeleteConversation isEqualToString:call.method]) {
-        [self deleteConversation:call.arguments
-                     channelName:call.method
-                          result:result];
     } else if ([ChatFetchHistoryMessagesByOptions isEqualToString:call.method]) {
         [self fetchHistoryMessagesByOptions:call.arguments
                                 channelName:call.method
@@ -220,131 +196,6 @@
     }];
 }
 
-- (void)getMessageWithMessageId:(NSDictionary *)param
-                    channelName:(NSString *)aChannelName
-                         result:(FlutterResult)result {
-    __weak typeof(self) weakSelf = self;
-    NSString *msgId = param[@"msg_id"];
-    EMChatMessage *msg = [EMClient.sharedClient.chatManager getMessageWithMessageId:msgId];
-    [weakSelf wrapperCallBack:result
-                  channelName:aChannelName
-                        error:nil
-                       object:[msg toJson]];
-}
-
-- (void)getConversation:(NSDictionary *)param
-            channelName:(NSString *)aChannelName
-                 result:(FlutterResult)result {
-    __weak typeof(self) weakSelf = self;
-    NSString *conId = param[@"convId"];
-    EMConversationType type = [EnumTools conversationTypeFromInt:[param[@"type"] intValue]];
-    BOOL needCreate = [param[@"createIfNeed"] boolValue];
-    EMConversation *con = [EMClient.sharedClient.chatManager getConversation:conId
-                                                                        type:type
-                                                            createIfNotExist:needCreate];
-    
-    [weakSelf wrapperCallBack:result
-                  channelName:aChannelName
-                        error:nil
-                       object:[con toJson]];
-}
-
-
-- (void)getUnreadMessageCount:(NSDictionary *)param
-                  channelName:(NSString *)aChannelName
-                       result:(FlutterResult)result {
-    __weak typeof(self) weakSelf = self;
-    NSArray *conList = [EMClient.sharedClient.chatManager getAllConversations];
-    int unreadCount = 0;
-    EMError *error = nil;
-    for (EMConversation *con in conList) {
-        unreadCount += con.unreadMessagesCount;
-    }
-    
-    [weakSelf wrapperCallBack:result
-                  channelName:aChannelName
-                        error:error
-                       object:@(unreadCount)];
-}
-
-- (void)downloadMessageAttachmentInCombine:(NSDictionary *)param
-                               channelName:(NSString *)aChannelName
-                                    result:(FlutterResult)result {
-    __weak typeof(self) weakSelf = self;
-    __block EMChatMessage *msg = [EMChatMessage fromJson:param[@"message"]];
-    [EMClient.sharedClient.chatManager downloadMessageAttachment:msg
-                                                        progress:^(int progress)
-     {
-        [weakSelf.messageChannel invokeMethod:ChatOnMessageProgressUpdate
-                                    arguments:@{
-            @"progress":@(progress),
-            @"localId": msg.messageId
-        }];
-    } completion:^(EMChatMessage *message, EMError *error)
-     {
-        if (error) {
-            NSDictionary *msgDict = [self updateDownloadStatus:EMDownloadStatusFailed message:message thumbnail:NO];
-            [weakSelf.messageChannel invokeMethod:ChatOnMessageError
-                                        arguments:@{
-                @"error":[error toJson],
-                @"localId":msg.messageId,
-                @"message":msgDict
-            }];
-        }else {
-            NSDictionary *msgDict = [self updateDownloadStatus:EMDownloadStatusSucceed message:message thumbnail:NO];
-            [weakSelf.messageChannel invokeMethod:ChatOnMessageSuccess
-                                        arguments:@{
-                @"message": msgDict,
-                @"localId": msg.messageId
-            }];
-        }
-    }];
-    
-    NSDictionary *msgDict = [self updateDownloadStatus:EMDownloadStatusDownloading message:msg thumbnail:NO];
-    [weakSelf wrapperCallBack:result
-                  channelName:aChannelName
-                        error:nil
-                       object:msgDict];
-}
-
-- (void)downloadMessageThumbnailInCombine:(NSDictionary *)param
-                              channelName:(NSString *)aChannelName
-                                   result:(FlutterResult)result {
-    __weak typeof(self) weakSelf = self;
-    __block EMChatMessage *msg = [EMChatMessage fromJson:param[@"message"]];
-    [EMClient.sharedClient.chatManager downloadMessageThumbnail:msg
-                                                       progress:^(int progress)
-     {
-        [weakSelf.messageChannel invokeMethod:ChatOnMessageProgressUpdate
-                                    arguments:@{
-            @"progress":@(progress),
-            @"localId":msg.messageId
-        }];
-    } completion:^(EMChatMessage *message, EMError *error)
-     {
-        if (error) {
-            NSDictionary *msgDict = [self updateDownloadStatus:EMDownloadStatusFailed message:message thumbnail:YES];
-            [weakSelf.messageChannel invokeMethod:ChatOnMessageError
-                                        arguments:@{
-                @"error":[error toJson],
-                @"localId":msg.messageId,
-                @"message":msgDict
-            }];
-        }else {
-            NSDictionary *msgDict = [self updateDownloadStatus:EMDownloadStatusSucceed message:message thumbnail:YES];
-            [weakSelf.messageChannel invokeMethod:ChatOnMessageSuccess
-                                        arguments:@{
-                @"message":msgDict,
-                @"localId":msg.messageId
-            }];
-        }
-    }];
-    NSDictionary *msgDict = [self updateDownloadStatus:EMDownloadStatusDownloading message:msg thumbnail:YES];
-    [weakSelf wrapperCallBack:result
-                  channelName:aChannelName
-                        error:nil
-                       object:msgDict];
-}
 
 - (void)downloadAttachment:(NSDictionary *)param
                channelName:(NSString *)aChannelName
@@ -480,23 +331,6 @@
         msg.body = body;
     }
     return [msg toJson];
-}
-
-- (void)deleteConversation:(NSDictionary *)param
-               channelName:(NSString *)aChannelName
-                    result:(FlutterResult)result {
-    __weak typeof(self)weakSelf = self;
-    NSString *conversationId = param[@"convId"];
-    BOOL isDeleteMsgs = [param[@"deleteMessages"] boolValue];
-    [EMClient.sharedClient.chatManager deleteConversation:conversationId
-                                         isDeleteMessages:isDeleteMsgs
-                                               completion:^(NSString *aConversationId, EMError *aError)
-     {
-        [weakSelf wrapperCallBack:result
-                      channelName:aChannelName
-                            error:aError
-                           object:@(!aError)];
-    }];
 }
 
 - (void)fetchHistoryMessagesByOptions:(NSDictionary *)param
@@ -687,17 +521,6 @@
                      arguments:list];
 }
 
-- (void)onMessageContentChanged:(EMChatMessage *)message operatorId:(NSString *)operatorId operationTime:(NSUInteger)operationTime {
-    NSDictionary *dict = @{
-        @"message": [message toJson],
-        @"operator": operatorId,
-        @"operationTime": @(operationTime)
-    };
-    
-    [self.channel invokeMethod:onMessageContentChanged
-                     arguments:dict];
-}
-
 - (void)messageAttachmentStatusDidChange:(EMChatMessage *)aMessage error:(EMError *)aError {
     
 }
@@ -709,7 +532,7 @@
         [list addObject:[info.recallMessage toJson]];
     }
     
-    [self.channel invokeMethod:onMessagesRecalledInfo
+    [self.channel invokeMethod:ChatOnMessagesRecalled
                      arguments:list];
 }
 
