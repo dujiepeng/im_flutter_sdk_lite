@@ -125,16 +125,6 @@
 - (NSDictionary *)toJson {
     NSMutableDictionary *ret = [NSMutableDictionary dictionary];
     ret[@"type"] = [NSNumber numberWithInteger:[EnumTools messageBodyTypeToInt:self.type]];
-    if(self.operatorId && self.operatorId.length > 0) {
-        ret[@"operatorId"] = self.operatorId;
-    }
-    if(self.operationTime > 0) {
-        ret[@"operatorTime"] = @(self.operationTime);
-    }
-    if(self.operatorCount > 0) {
-        ret[@"operatorCount"] = @(self.operatorCount);
-    }
-    
     return ret;
 }
 
